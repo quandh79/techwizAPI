@@ -6,6 +6,7 @@ const AppError = require("../utils/appError");
 const crypto = require('crypto');
 const nodemailer = require('nodemailer');
 const bcrypt = require("bcryptjs");
+var validator = require('validator');
 
 class authController{
   static security =0
@@ -73,25 +74,24 @@ exports.signup = async (req, res, next) => {
   try {
     const u = await User.findOne({userName:req.body.userName});
     if(u){
-      res.status(403).json("User name is exists")
+      res.status(422).json("User name is exists")
       return
     }
-    const e = await UserProfile.findOne({email:req.body.email});
-    if(e){
-      res.status(403).json({
-        message:"Email da duoc su dung"
-      })
-      return
-    }
-    if(req.body.password != req.body.passwordConfirm){ res.status(403).json({
+   
+    if(req.body.password != req.body.passwordConfirm){ res.status(422).json({
       message:"Mat khau xac nhan khong dung"
     })
-    return }
-    const hash = await bcrypt.hash(req.body.password,10); 
+    return 
+  }
+    const salt = await bcrypt.genSalt(10);
+    const hash = await bcrypt.hash(req.body.password,salt); 
+    
     const user = await User.create({
       userName: req.body.userName,
-      password: hash
+      password: hash,
+     
     });
+    
     
     const up = await UserProfile.create({
       userId: user._id,
@@ -107,13 +107,12 @@ exports.signup = async (req, res, next) => {
     const token = createToken(user.id);
 
     user.password = undefined;
-
+    user.profile = up
     res.status(201).json({
       status: "success",
       token,
       data: {
-        user,
-        up
+        user:user
       },
     });
   } catch (err) {
@@ -121,6 +120,44 @@ exports.signup = async (req, res, next) => {
     next(err);
   }
 };
+exports.sendOTP = async (req,res,next) =>{
+  try{
+      const { email } = req.body;
+      const e = validator.isEmail(email);
+    if(e){
+      res.status(422).json({
+        message:"Email da duoc su dung"
+      })
+      return
+    }
+      if(!e){
+        res.status(422).json({
+          message:"Email khong hop le"
+        })
+        return
+      }
+      // gen otp
+      const otp = Math.floor(100000 + Math.random()*900000);
+      const u = await User.findOne({email:email});
+      
+      if(!u){
+        await sendEmail({
+          email: email,
+          subject: 'Yêu cầu đặt lại mật khẩu',
+          message: `Ma xac nhan cua ban la: ${otp}`,
+        });
+        res.status(200).json({
+          otp: otp
+        })
+        return ;
+      }
+  
+  }catch(err){
+    next(err);
+  }
+}
+
+
 
 // exports.protect = async (req, res, next) => {
 //   try {
@@ -211,20 +248,24 @@ exports.forgotPassword = async (req, res, next) => {
     }
 
     // 2) Tạo reset token và lưu vào DB
-    security = Math.floor(100000 + Math.random()*900000);
-    console.log(security)
-    user.resetToken = security
-    const passwordResetExpires = new Date(new Date().toUTCString()) + 10 * 60 * 1000; // 10 phút
-    console.log(new Date(new Date().toUTCString()))
-    console.log(passwordResetExpires)
+    // security = Math.floor(100000 + Math.random()*900000);
+    // console.log(security)
+    // user.resetOTP = security
+    // const passwordResetExpires = new Date(new Date().toUTCString()) + 10 * 60 * 1000; // 10 phút
+    // console.log(new Date(new Date().toUTCString()))
+    // console.log(passwordResetExpires)
+    
+    user.passwordResetToken = hashedResetToken;
+    user.passwordResetExpires = Date.now() + 10 * 60 * 1000; // 10 phút
     await user.save({ validateBeforeSave: false });
+    
 
 
     // 4) Gửi email chứa mã token đến địa chỉ email của người dùng
     await sendEmail({
       email: user.email,
       subject: 'Yêu cầu đặt lại mật khẩu',
-      message: `Ma xac nhan cua ban la: ${resetToken}`,
+      message: `Ma xac nhan cua ban la: ${hashedResetToken}`,
     });
 
     res.status(200).json({
@@ -236,36 +277,52 @@ exports.forgotPassword = async (req, res, next) => {
   }
 };
 
+exports.checkTokenReset = async (req, res, next) =>{
+  try{
+      const { token } = req.body;
+      const tokenReset = User.findOne({passwordResetToken:req.body})
+      if(tokenReset){
+        return  res.status(200).json({
+          success: true,
+          message:'ma otp hop le'
+        })
+        
+      }
+  }catch(err){
+    next(err)
+  }
+}
+
 exports.resetPassword = async (req, res, next) => {
   try {
-    console.log(security)
-    // const { token } = req.query.token;
-    // console.log("token 1111",req.query.token)
-    // const { password, passwordConfirm } = req.body;
+    //console.log(security)
+    //const { token } = req.query.token;
+    //console.log("token 1111",req.query.token)
+    const { password, passwordConfirm } = req.body;
 
-    // // 1) Giải mã token và kiểm tra tính hợp lệ
-    // const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
-    // if (!decodedToken.userId) {
-    //   return next(new AppError(400, 'fail', 'Mã token không hợp lệ'));
-    // }
+    // 1) Giải mã token và kiểm tra tính hợp lệ
+    const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+    if (!decodedToken.userId) {
+      return next(new AppError(400, 'fail', 'Mã token không hợp lệ'));
+    }
 
-    // // 2) Tìm user dựa trên userId và kiểm tra xem có hợp lệ để thực hiện reset password
-    // const user = await User.findById(decodedToken.userId);
-    // if (!user || !user.passwordResetToken || user.passwordResetToken !== crypto.createHash('sha256').update(token).digest('hex') || user.passwordResetExpires < Date.now()) {
-    //   return next(new AppError(400, 'fail', 'Mã token không hợp lệ hoặc đã hết hạn'));
-    // }
+    // 2) Tìm user dựa trên userId và kiểm tra xem có hợp lệ để thực hiện reset password
+    const user = await User.findById(decodedToken.userId);
+    if (!user || !user.passwordResetToken || user.passwordResetToken !== crypto.createHash('sha256').update(token).digest('hex') || user.passwordResetExpires < Date.now()) {
+      return next(new AppError(400, 'fail', 'Mã token không hợp lệ hoặc đã hết hạn'));
+    }
 
-    // // 3) Cập nhật mật khẩu mới và xóa các trường liên quan đến reset password
-    // user.password = password;
-    // user.passwordConfirm = passwordConfirm;
-    // user.passwordResetToken = undefined;
-    // user.passwordResetExpires = undefined;
-    // await user.save();
+    // 3) Cập nhật mật khẩu mới và xóa các trường liên quan đến reset password
+    user.password = password;
+    user.passwordConfirm = passwordConfirm;
+    user.passwordResetToken = undefined;
+    user.passwordResetExpires = undefined;
+    await user.save();
 
-    // res.status(200).json({
-    //   status: 'success',
-    //   message: 'Mật khẩu đã được cập nhật thành công',
-    // });
+    res.status(200).json({
+      status: 'success',
+      message: 'Mật khẩu đã được cập nhật thành công',
+    });
   } catch (err) {
     next(err);
   }
