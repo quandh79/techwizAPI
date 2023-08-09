@@ -48,7 +48,7 @@ process.on('uncaughtException', err => {
 });
 
 
-const database = "mongodb://127.0.0.1:27017/api_nodejs_l ";
+const database = "mongodb+srv://ungsymui:Usm03091991@cluster0.c0navp3.mongodb.net/?retryWrites=true&w=majority";
 
 // Connect the database
 mongoose.connect(database).then(con => {

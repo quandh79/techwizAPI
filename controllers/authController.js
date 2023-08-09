@@ -77,6 +77,13 @@ exports.signup = async (req, res, next) => {
       res.status(422).json("User name is exists")
       return
     }
+    const e = await UserProfile.findOne({email:req.body.email});
+    if(e){
+      res.status(403).json({
+        message:"Email da duoc su dung"
+      })
+      return
+    }
    
     if(req.body.password != req.body.passwordConfirm){ res.status(422).json({
       message:"Mat khau xac nhan khong dung"
@@ -124,12 +131,7 @@ exports.sendOTP = async (req,res,next) =>{
   try{
       const { email } = req.body;
       const e = validator.isEmail(email);
-    if(e){
-      res.status(422).json({
-        message:"Email da duoc su dung"
-      })
-      return
-    }
+ 
       if(!e){
         res.status(422).json({
           message:"Email khong hop le"
@@ -138,7 +140,7 @@ exports.sendOTP = async (req,res,next) =>{
       }
       // gen otp
       const otp = Math.floor(100000 + Math.random()*900000);
-      const u = await User.findOne({email:email});
+      const u = await UserProfile.findOne({email:email});
       
       if(!u){
         await sendEmail({
