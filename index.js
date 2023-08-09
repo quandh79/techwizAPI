@@ -29,8 +29,12 @@ app.use(cors());
 app.use(helmet());
 app.use(logger('dev'))
 app.use(bodyParser.json());
-const userRoute = require('./routes/userRoutes')
-app.use('/api', userRoute)
+// const userRoute = require('./routes/userRoutes')
+const authRoute = require('./routes/auth.routes')
+// app.use('/api', userRoute)
+app.use('/api', authRoute)
+
+
 
 process.on('uncaughtException', err => {
     console.log('UNCAUGHT EXCEPTION!!! shutting down...');
@@ -39,7 +43,7 @@ process.on('uncaughtException', err => {
 });
 
 
-const database = "mongodb+srv://ungsymui:Usm03091991@cluster0.c0navp3.mongodb.net/?retryWrites=true&w=majority";
+const database = "mongodb://127.0.0.1:27017/api_nodejs_l ";
 
 // Connect the database
 mongoose.connect(database).then(con => {
