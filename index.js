@@ -26,9 +26,14 @@ const app = express();
 app.use(cors());
 
 // Set security HTTP headers
+const formData = require('express-form-data');
+
+app.use(formData.parse());
 app.use(helmet());
 app.use(logger('dev'))
 app.use(bodyParser.json());
+app.use(express.json());
+app.use(express.urlencoded({extended:true}));
 // const userRoute = require('./routes/userRoutes')
 const authRoute = require('./routes/auth.routes')
 // app.use('/api', userRoute)

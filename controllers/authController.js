@@ -248,14 +248,14 @@ exports.forgotPassword = async (req, res, next) => {
     }
 
     // 2) Tạo reset token và lưu vào DB
-    // security = Math.floor(100000 + Math.random()*900000);
+    security = Math.floor(100000 + Math.random()*900000);
     // console.log(security)
     // user.resetOTP = security
     // const passwordResetExpires = new Date(new Date().toUTCString()) + 10 * 60 * 1000; // 10 phút
     // console.log(new Date(new Date().toUTCString()))
     // console.log(passwordResetExpires)
     
-    user.passwordResetToken = hashedResetToken;
+    user.passwordResetToken = security;
     user.passwordResetExpires = Date.now() + 10 * 60 * 1000; // 10 phút
     await user.save({ validateBeforeSave: false });
     

@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const validator = require("validator");
 const userSchema = new mongoose.Schema({
     userName:{
         type:String,
@@ -15,10 +16,14 @@ const userSchema = new mongoose.Schema({
         maxLength:255,
         
     },
+   
       isActive: {
         type: Boolean,
         default: true
-      }
+      },
+      
+      passwordResetToken: String,
+      passwordResetExpires: Date,
     
 
 });

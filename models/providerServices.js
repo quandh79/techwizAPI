@@ -18,7 +18,7 @@ const ProviderService = new mongoose.Schema({
         type: Boolean,
         default: true
       },
-      streamingProviderId: {type: Schema.ObjectId, ref: "User", required: true},
+      streamingProviderId: {type: Schema.ObjectId, ref: "streamingProvider", required: true},
 
 })
 module.exports = mongoose.model("ProviderService",ProviderService);
