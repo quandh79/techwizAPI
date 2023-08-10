@@ -13,9 +13,7 @@ exports.getStreamingProviders = async (req, res) => {
 exports.getStreamingProviderByName = async (req, res) => {
   try {
     const { name } = req.body;
-    const data = await streamingProviders
-      .findOne({ name })
-      .populate("serviceId");
+    const data = await streamingProviders.findOne({ name });
     if (!data) {
       return res.status(404).json({ message: "Provider is not exists" });
     }
