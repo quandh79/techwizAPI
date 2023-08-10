@@ -12,7 +12,8 @@ const bodyParser = require('body-parser')
 const logger = require("morgan");
 
 
-const userRoutes = require('./routes/userRoutes');
+
+const userRoutes = require('./routes/Manage.Routes');
 const globalErrHandler = require('./controllers/errorController');
 const AppError = require('./utils/appError');
 dotenv.config({
@@ -26,11 +27,25 @@ const app = express();
 app.use(cors());
 
 // Set security HTTP headers
+const formData = require('express-form-data');
+
+app.use(formData.parse());
 app.use(helmet());
 app.use(logger('dev'))
 app.use(bodyParser.json());
-const userRoute = require('./routes/userRoutes')
-app.use('/api', userRoute)
+app.use(express.json());
+app.use(express.urlencoded({extended:true}));
+
+
+// const userRoute = require('./routes/userRoutes')
+const authRoute = require('./routes/auth.routes')
+// app.use('/api', userRoute)
+app.use('/api', authRoute)
+const manageRoute = require('./routes/Manage.Routes')
+// app.use('/api', userRoute)
+app.use('/api/manage/', manageRoute)
+
+
 
 process.on('uncaughtException', err => {
     console.log('UNCAUGHT EXCEPTION!!! shutting down...');
