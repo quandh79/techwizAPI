@@ -14,10 +14,11 @@ const authRoute = require("./routes/auth.routes");
 const providerRoute = require("./routes/streamingProvider.routes");
 const regserviceRoute = require("./routes/regservice.routes");
 const channelRoute = require("./routes/channel.routes");
-
 const userRoutes = require("./routes/userRoutes");
 const globalErrHandler = require("./controllers/errorController");
 const AppError = require("./utils/appError");
+const { notiSender } = require("./utils/fcmNotification");
+
 dotenv.config({
   path: "./config.env",
 });
@@ -71,6 +72,9 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log("Server is running...");
 });
+
+//import from module -> registration-tokens array as parameters
+//notiSender([""]);
 
 app.use(express.json());
 app.get("/", (req, res) => {
