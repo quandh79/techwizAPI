@@ -1,4 +1,7 @@
 const mongoose = require("mongoose");
+const {Schema} = require("mongoose");
+
+
 
 const UserProviderServices = new mongoose.Schema({
   name: {
@@ -26,11 +29,11 @@ const UserProviderServices = new mongoose.Schema({
     type: Date,
     required: [true, "Please fill your Subscription Renewal Date"],
   },
-  streamingProvider: {
+  streamingProviderId: {
     type: Schema.Types.ObjectId,
     ref: "streamingProvider",
     required: true,
   },
-  user: { type: Schema.Types.ObjectId, ref: "User", required: true },
+  userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
 });
 module.exports = mongoose.model("UserProviderServices", UserProviderServices);

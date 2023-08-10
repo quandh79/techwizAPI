@@ -12,8 +12,7 @@ const bodyParser = require("body-parser");
 const logger = require("morgan");
 const authRoute = require("./routes/auth.routes");
 const providerRoute = require("./routes/streamingProvider.routes");
-
-const userRoutes = require("./routes/userRoutes");
+const manageRoute = require('./routes/Manage.Routes')
 const globalErrHandler = require("./controllers/errorController");
 const AppError = require("./utils/appError");
 dotenv.config({
@@ -26,6 +25,9 @@ const app = express();
 app.use(cors());
 
 // Set security HTTP headers
+const formData = require('express-form-data');
+
+app.use(formData.parse());
 app.use(helmet());
 app.use(logger("dev"));
 app.use(bodyParser.json());
@@ -35,13 +37,16 @@ app.use(bodyParser.json());
 app.use("/api", authRoute);
 app.use("/api/provider", providerRoute);
 
+app.use('/api/manage/', manageRoute)
+
 process.on("uncaughtException", (err) => {
   console.log("UNCAUGHT EXCEPTION!!! shutting down...");
   console.log(err.name, err.message);
   process.exit(1);
 });
 
-const database = "mongodb://127.0.0.1:27017/api_nodejs_l ";
+const database = "mongodb://127.0.0.1:27017/api_nodejs_l";
+// mongodb+srv://ungsymui:Usm03091991@cluster0.c0navp3.mongodb.net/?retryWrites=true&w=majority
 
 // Connect the database
 mongoose.connect(database).then((con) => {
