@@ -15,10 +15,6 @@ const UserProviderServices = new mongoose.Schema({
         type: String,
         required: [true, "Please fill your description"],
       },
-      isActive: {
-        type: Boolean,
-        default: true
-      },
       SubscriptionDate: {
         type: Date,
         required: [true, "Please fill your Subscription Date"],
@@ -27,8 +23,12 @@ const UserProviderServices = new mongoose.Schema({
         type: Date,
         required: [true, "Please fill your Subscription Renewal Date"],
       },
-      streamingProvider: {type: Schema.ObjectId, ref: "streamingProvider", required: true},
-      user: {type: Schema.ObjectId, ref: "User", required: true},
+      isActive: {
+        type: Boolean,
+        default: false
+      },
+      streamingProviderId: {type: Schema.ObjectId, ref: "streamingProvider", required: true},
+      userId: {type: Schema.ObjectId, ref: "User", required: true},
 
 })
 module.exports = mongoose.model("UserProviderServices",UserProviderServices);

@@ -14,10 +14,6 @@ const userSchema = new mongoose.Schema({
     lowercase: true,
     validate: [validator.isEmail, " Please provide a valid email"],
   },
-  address: {
-    type: String,
-    trim: true,
-  },
   password: {
     type: String,
     required: [true, "Please fill your password"],
@@ -38,15 +34,13 @@ const userSchema = new mongoose.Schema({
   role: {
     type: String,
     enum: ["admin", "teacher", "student"],
-    default: "student",
+    default: "admin",
   },
   active: {
     type: Boolean,
     default: true,
     select: false,
   },
-  passwordResetToken: String,
-  passwordResetExpires: Date
 });
 
 // encrypt the password using 'bcryptjs'
@@ -73,5 +67,5 @@ userSchema.methods.correctPassword = async function(
   return await bcrypt.compare(typedPassword, originalPassword);
 };
 
-const User = mongoose.model("User", userSchema);
-module.exports = User;
+const Admin = mongoose.model("Admin", userSchema);
+module.exports = Admin;

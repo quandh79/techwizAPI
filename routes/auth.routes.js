@@ -2,6 +2,7 @@ const express = require('express');
 //const router = express.Router();
 const router = express.Router();
 const authController = require('./../controllers/authController');
+const authAdminController = require('../controllers/authAdminController');
 const streamingProviderController = require('./../controllers/streamingProviderController');
 
 router.post('/forgot-password', authController.forgotPassword);
@@ -16,6 +17,11 @@ router.post('/stream-provider/create',streamingProviderController.Create);
 router.patch('/stream-provider/update/:id',streamingProviderController.Update);
 router.post('/stream-provider/delete/:id',streamingProviderController.deleteMe)
 
+
+//Route Admin
+
+router.post('/admin/login', authAdminController.login);
+router.post('/admin/signup', authAdminController.signup);
 
 
 
