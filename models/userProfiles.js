@@ -1,18 +1,13 @@
 const mongoose = require("mongoose");
-const validator = require("validator");
-const {Schema} = require("mongoose")
+const { Schema } = require("mongoose");
 
 const userProfile = new mongoose.Schema({
   name: {
     type: String,
     required: [true, "Please fill your name"],
   },
-  email: {
-    type: String,
-    required: [true, "Please fill your email"],
-    unique: true,
-    lowercase: true,
-    validate: [validator.isEmail, " Please provide a valid email"],
+  birthday: {
+    type: Date,
   },
   address: {
     type: String,
@@ -30,12 +25,7 @@ const userProfile = new mongoose.Schema({
     type: Number,
     required: [true, "Please fill your zipcode"],
   },
-  userId: {type: Schema.Types.ObjectId, ref: "User", required: true},
-
-
+  userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
 });
 
-
-
-
-module.exports =  mongoose.model("UserProfile", userProfile);
+module.exports = mongoose.model("UserProfile", userProfile);
