@@ -36,10 +36,10 @@ const createToken = (id) => {
 
 exports.login = async (req, res, next) => {
   try {
-    const { userName, password } = req.body;
+    const { email, password } = req.body;
 
     // 1) check if email and password exist
-    if (!userName || !password) {
+    if (!email || !password) {
       return next(
         new AppError(404, "fail", "Please provide email or password"),
         req,
@@ -50,7 +50,7 @@ exports.login = async (req, res, next) => {
 
     // 2) check if user exist and password is correct
     const user = await User.findOne({
-      userName,
+      email,
     });
     const correctPassword = await bcrypt.compare(password, user.password);
     console.log(correctPassword);
