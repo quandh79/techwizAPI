@@ -13,7 +13,7 @@ const logger = require("morgan");
 
 
 
-const userRoutes = require('./routes/userRoutes');
+const userRoutes = require('./routes/Manage.Routes');
 const globalErrHandler = require('./controllers/errorController');
 const AppError = require('./utils/appError');
 dotenv.config({
@@ -41,6 +41,9 @@ app.use(express.urlencoded({extended:true}));
 const authRoute = require('./routes/auth.routes')
 // app.use('/api', userRoute)
 app.use('/api', authRoute)
+const manageRoute = require('./routes/Manage.Routes')
+// app.use('/api', userRoute)
+app.use('/api/manage/', manageRoute)
 
 
 
@@ -51,7 +54,7 @@ process.on('uncaughtException', err => {
 });
 
 
-const database = "mongodb://127.0.0.1:27017/api_nodejs_l ";
+const database = "mongodb+srv://ungsymui:Usm03091991@cluster0.c0navp3.mongodb.net/?retryWrites=true&w=majority";
 
 // Connect the database
 mongoose.connect(database).then(con => {

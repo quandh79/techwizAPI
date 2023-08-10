@@ -1,4 +1,4 @@
-const User = require('../models/userModel');
+const User = require('../models/adminModel');
 const base = require('./baseController');
 
 exports.deleteMe = async (req, res, next) => {
