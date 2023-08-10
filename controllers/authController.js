@@ -53,7 +53,6 @@ exports.login = async (req, res, next) => {
       email,
     });
     const correctPassword = await bcrypt.compare(password, user.password);
-    console.log(correctPassword);
     if (!user || !correctPassword) {
       return next(
         new AppError(401, "fail", "Email or Password is wrong"),
@@ -63,13 +62,11 @@ exports.login = async (req, res, next) => {
       );
     }
 
-    // 3) All correct, send jwt to client
     const token = createToken(user.id);
 
-    // Remove the password from the output
     user.password = undefined;
 
-    res.status(200).json({
+    return res.status(200).json({
       status: "success",
       token,
       data: {
@@ -127,7 +124,7 @@ exports.signup = async (req, res, next) => {
 
     user.password = undefined;
 
-    res.status(201).json({
+    return res.status(201).json({
       status: "success",
       token,
       data: {
@@ -270,9 +267,11 @@ exports.resetPassword = async (req, res, next) => {
           .status(200)
           .json({ success: true, message: "Đặt lại mật khẩu thành công" });
       }
-      res.status(403).json({ error: "mật khẩu xác nhận không đúng" });
+      return res.status(403).json({ error: "mật khẩu xác nhận không đúng" });
     } else {
-      res.status(403).json({ error: "mã xác nhận không đúng hoặc đã hết hạn" });
+      return res
+        .status(403)
+        .json({ error: "mã xác nhận không đúng hoặc đã hết hạn" });
     }
   } catch (err) {
     next(err);

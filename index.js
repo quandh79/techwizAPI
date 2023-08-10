@@ -13,6 +13,7 @@ const logger = require("morgan");
 const authRoute = require("./routes/auth.routes");
 const providerRoute = require("./routes/streamingProvider.routes");
 const regserviceRoute = require("./routes/regservice.routes");
+const channelRoute = require("./routes/channel.routes");
 
 const userRoutes = require("./routes/userRoutes");
 const globalErrHandler = require("./controllers/errorController");
@@ -36,6 +37,7 @@ app.use(bodyParser.json());
 app.use("/api", authRoute);
 app.use("/api/provider", providerRoute);
 app.use("/api/regsevice", regserviceRoute);
+app.use("/api/channel", channelRoute);
 
 process.on("uncaughtException", (err) => {
   console.log("UNCAUGHT EXCEPTION!!! shutting down...");

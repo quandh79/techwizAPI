@@ -4,6 +4,7 @@ const User = require("../models/users");
 const jwt = require("jsonwebtoken");
 const streamingProviders = require("../models/streamingProviders");
 const { promisify } = require("util");
+const userProviderServices = require("../models/userProviderServices");
 
 exports.registerProviderService = async (req, res, next) => {
   try {
@@ -13,41 +14,31 @@ exports.registerProviderService = async (req, res, next) => {
     ) {
       token = req.headers.authorization.split(" ")[1];
     }
-    console.log(token);
-    // 2) Verify token
     const decode = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
-    console.log(decode);
     const user = await User.findById(decode.id);
-    console.log(user);
     const { code } = req.body;
-    console.log(code);
     const service = await streamingProviders.findOne({
       packages: { $elemMatch: { code: code } },
     });
 
-    console.log(service);
+    if (!service) {
+      return res.status(404).json({ message: "Not Found" });
+    }
     const package = await service.packages.filter(
       (pkg) => pkg.code === code
     )[0];
-    console.log(package);
     if (!user || !service) {
       res.status(422).json({
-        message: "khong tim thay tai khoan hoac dich vu",
+        message: "Not Found user or service",
       });
       return;
     }
-    const currentDate = new Date();
-    const renewalDate = new Date(
-      currentDate.getTime() + 30 * 24 * 60 * 60 * 1000
-    );
 
     const ps = await UserProviderServices.create({
       name: package.name,
       price: package.price,
       description: package.description,
-      SubscriptionDate: currentDate,
-      RenewalDate: renewalDate,
-      isActive: true,
+
       streamingProviderId: service.id,
       userId: user._id,
     });
@@ -55,10 +46,30 @@ exports.registerProviderService = async (req, res, next) => {
     await ps.save();
 
     return res.status(201).json({
-      sucess: "dang ky dich vu thanh cong",
+      message: "Success",
       ps: ps,
     });
   } catch (err) {
     next(err);
+  }
+};
+
+exports.isActive = async (req, res) => {
+  try {
+    const { id } = req.body;
+    const currentDate = new Date();
+    const renewalDate = new Date(
+      currentDate.getTime() + 30 * 24 * 60 * 60 * 1000
+    );
+    const us = await userProviderServices.findById(id);
+    if (!us) {
+      return res.status(404).json({ message: "Not Found" });
+    }
+    us.isActive = true;
+    (us.SubscriptionDate = currentDate), (us.RenewalDate = renewalDate);
+    us.save();
+    return res.status(201).json({ message: "success", data: renewalDate });
+  } catch (err) {
+    return res.status(500).json(err.message);
   }
 };

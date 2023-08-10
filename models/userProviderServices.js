@@ -17,7 +17,7 @@ const UserProviderServices = new mongoose.Schema({
   },
   isActive: {
     type: Boolean,
-    default: true,
+    default: false,
   },
   SubscriptionDate: {
     type: Date,
