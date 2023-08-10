@@ -1,7 +1,4 @@
 const mongoose = require("mongoose");
-const {Schema} = require("mongoose");
-
-
 
 const UserProviderServices = new mongoose.Schema({
   name: {
@@ -19,7 +16,7 @@ const UserProviderServices = new mongoose.Schema({
   },
   isActive: {
     type: Boolean,
-    default: true,
+    default: false,
   },
   SubscriptionDate: {
     type: Date,

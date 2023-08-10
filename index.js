@@ -12,7 +12,8 @@ const bodyParser = require("body-parser");
 const logger = require("morgan");
 const authRoute = require("./routes/auth.routes");
 const providerRoute = require("./routes/streamingProvider.routes");
-const manageRoute = require('./routes/Manage.Routes')
+
+const userRoutes = require("./routes/userRoutes");
 const globalErrHandler = require("./controllers/errorController");
 const AppError = require("./utils/appError");
 dotenv.config({
@@ -36,6 +37,8 @@ app.use(bodyParser.json());
 // app.use('/api', userRoute)
 app.use("/api", authRoute);
 app.use("/api/provider", providerRoute);
+app.use("/api/regsevice", regserviceRoute);
+app.use("/api/channel", channelRoute);
 
 app.use('/api/manage/', manageRoute)
 
