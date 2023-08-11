@@ -10,17 +10,17 @@ const UserProviderServices = require("../models/userProviderServices")
 
 paypal.configure({
     'mode': 'sandbox', //sandbox or live
-    'client_id': 'AW08gKdTJAStrt0PenCcUa-EPaqphhipPcMNjtWKfIoRSHWBt-YRM5bea51ZAiv16baUZQLO2BNCKETw',
-    'client_secret': 'EF-_jU1cTmNx1UQHkyl7nq3puKAd2JSAvFSbHxgfGeoNgiXsaW4eQ-PalxcQ5hZHcGJ5kD3sfB-21w7L'
+    'client_id': 'AXVhMtt0o6nZ5XI-NJHdM9Jzerkg2ln1XZ9c7qmp2VVvtIPFMhApTU_wUumG2kqUCRY3n_20UBbUqjZH',
+    'client_secret': 'ENR3gDRecvDCf2k9imwW2VyvP662n3AYD1WhzmDcZl_aGotYMay4jtd0kfAp6fKE6BlUOEVGjQAWkfp1'
 })
 
 router.get('/', async (req, res) => { 
-    const{providerId,code} = req.body;
+    const{providerId,code} = req.query;//?id=bbbb&
     // const user = req.user
 
 
     
-    const userData = await userProfiles.findOne({userId:"64d53b5a0d5f7061e7b3d145"});
+    const userData = await userProfiles.findOne({userId:"64d62dd9087c52157ce879b0"});
     const providerData= await streamingProviders.findById("64d4c7f09ef9f5dc7191b3af");
     const packageData = await providerData.packages.filter(
         (pkg) => pkg.code === "ba"
@@ -43,29 +43,25 @@ router.get('/', async (req, res) => {
 
 
 router.get('/pay', (req, res) => {
-    debugger
+    console.log(req.query);
+    const{amount} = req.query;
+    const{psId} =req.query;
+   
+    var am = parseInt(amount);
+    am = isNaN(am)?0:am;
     const create_payment_json = {
         "intent": "sale",
         "payer": {
             "payment_method": "paypal"
         },
         "redirect_urls": {
-            "return_url": "http://localhost:3000/success",
+            "return_url": "http://localhost:3000/success&psId=<%=psId%>",
             "cancel_url": "http://localhost:3000/cancel"
         },
         "transactions": [{
-            "item_list": {
-                "items": [{
-                    "name": "Iphone 5S",
-                    "sku": "002",
-                    "price": "26.00",
-                    "currency": "USD",
-                    "quantity": 1
-                }]
-            },
             "amount": {
                 "currency": "USD",
-                "total": "1100.00"
+                "total": am+".00"
             },
             "description": "Iphone 5S cũ giá siêu rẻ"
         }]
@@ -94,12 +90,13 @@ router.get('/pay', (req, res) => {
 });
 
 router.get('/success', (req, res) => {
+    const{psId}=req.query;
 
     const payerId = req.query.PayerID;
     const paymentId = req.query.paymentId;
-    const {id} = req.ps._id
-    console.log(req.ps)
-    console.log(id)
+    // const {id} = req.ps._id
+    // console.log(req.ps)
+    // console.log(id)
 
     const execute_payment_json = {
         "payer_id": payerId,
@@ -116,7 +113,7 @@ router.get('/success', (req, res) => {
             throw error;
         } else {
             console.log(JSON.stringify(payment));
-             isActive(id)
+             isActive(psId)
             res.render('../views/success');
         }
     });
