@@ -37,10 +37,10 @@ const createToken = id => {
 
 exports.login = async (req, res, next) => {
   try {
-    const { userName, password } = req.body;
+    const { email, password } = req.body;
 
     // 1) check if email and password exist
-    if (!userName || !password) {
+    if (!email || !password) {
       return next(
         new AppError(404, "fail", "Please provide email or password"),
         req,
@@ -51,7 +51,7 @@ exports.login = async (req, res, next) => {
 
     // 2) check if user exist and password is correct
     const user = await User.findOne({
-      userName,
+      email,
     });
 const correctPassword = await bcrypt.compare(password, user.password)
 console.log(correctPassword)
@@ -84,29 +84,25 @@ console.log(correctPassword)
 
 exports.signup = async (req, res, next) => {
   try {
-    const u = await User.findOne({userName:req.body.userName});
-    if(u){
-      res.status(422).json("User name is exists")
-      return
-    }
-    const e = await UserProfile.findOne({email:req.body.email});
+    
+    const e = await User.findOne({email:req.body.email});
     if(e){
-      res.status(403).json({
+      res.status(422).json({
         message:"Email da duoc su dung"
       })
       return
     }
    
-    if(req.body.password != req.body.passwordConfirm){ res.status(422).json({
+    if(req.body.password != req.body.passwordConfirm){return res.status(422).json({
       message:"Mat khau xac nhan khong dung"
     })
-    return 
+     
   }
     const salt = await bcrypt.genSalt(10);
     const hash = await bcrypt.hash(req.body.password,salt); 
     
     const user = await User.create({
-      userName: req.body.userName,
+      email: req.body.email,
       password: hash,
      
     });
@@ -115,23 +111,23 @@ exports.signup = async (req, res, next) => {
     const up = await UserProfile.create({
       userId: user._id,
       name:req.body.name,
-      email: req.body.email,
+      birthday:req.body.birthday,
       address:req.body.address,
       city:req.body.city,
       country:req.body.country,
-      zipcode:req.body.zipcode
+     
 
     })
 
     const token = createToken(user.id);
 
     user.password = undefined;
-    user.profile = up
+    user.UserProfile = up
     res.status(201).json({
       status: "success",
       token,
       data: {
-        user:user
+        user:up
       },
     });
   } catch (err) {
@@ -142,29 +138,38 @@ exports.signup = async (req, res, next) => {
 exports.sendOTP = async (req,res,next) =>{
   try{
       const { email } = req.body;
+      const c = await User.findOne({email:email});
+    if(c){
+      return  res.status(422).json({
+        message:"Email da duoc su dung"
+      });
+    };
+      
+    
       const e = validator.isEmail(email);
  
       if(!e){
-        res.status(422).json({
+        return  res.status(422).json({
           message:"Email khong hop le"
-        })
-        return
-      }
+        });
+        
+      };
       // gen otp
       const otp = Math.floor(100000 + Math.random()*900000);
-      const u = await UserProfile.findOne({email:email});
       
-      if(!u){
-        await sendEmail({
+      
+      
+         sendEmail({
           email: email,
-          subject: 'Yêu cầu đặt lại mật khẩu',
+          subject: 'Yêu cầu đăng ký tài khoản',
           message: `Ma xac nhan cua ban la: ${otp}`,
         });
-        res.status(200).json({
-          otp: otp
-        })
-        return ;
-      }
+       
+         
+      
+
+        return res.status(200).json({
+             otp: otp})
   
   }catch(err){
     next(err);
@@ -173,49 +178,49 @@ exports.sendOTP = async (req,res,next) =>{
 
 
 
-exports.protect = async (req, res, next) => {
-  try {
-    // 1) check if the token is there
-    let token;
-    if (
-      req.headers.authorization &&
-      req.headers.authorization.startsWith("Bearer")
-    ) {
-      token = req.headers.authorization.split(" ")[1];
-    }
-    if (!token) {
-      return next(
-        new AppError(
-          401,
-          "fail",
-          "You are not logged in! Please login in to continue",
-        ),
-        req,
-        res,
-        next,
-      );
-    }
+// exports.protect = async (req, res, next) => {
+//   try {
+//     // 1) check if the token is there
+//     let token;
+//     if (
+//       req.headers.authorization &&
+//       req.headers.authorization.startsWith("Bearer")
+//     ) {
+//       token = req.headers.authorization.split(" ")[1];
+//     }
+//     if (!token) {
+//       return next(
+//         new AppError(
+//           401,
+//           "fail",
+//           "You are not logged in! Please login in to continue",
+//         ),
+//         req,
+//         res,
+//         next,
+//       );
+//     }
 
-    // 2) Verify token
-    const decode = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
+//     // 2) Verify token
+//     const decode = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
 
-    // 3) check if the user is exist (not deleted)
-    const user = await User.findById(decode.id);
-    if (!user) {
-      return next(
-        new AppError(401, "fail", "This user is no longer exist"),
-        req,
-        res,
-        next,
-      );
-    }
+//     // 3) check if the user is exist (not deleted)
+//     const user = await User.findById(decode.id);
+//     if (!user) {
+//       return next(
+//         new AppError(401, "fail", "This user is no longer exist"),
+//         req,
+//         res,
+//         next,
+//       );
+//     }
 
-    req.user = user;
-    next();
-  } catch (err) {
-    next(err);
-  }
-};
+//     req.user = user;
+//     next();
+//   } catch (err) {
+//     next(err);
+//   }
+// };
 
 // 
 // exports.restrictTo = (...roles) => {
@@ -277,6 +282,7 @@ exports.forgotPassword = async (req, res, next) => {
     });
 
     res.status(200).json({
+      resetToken:resetToken,
       status: "success",
       message: "Mã token đã được gửi đến email của bạn",
     });

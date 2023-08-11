@@ -7,29 +7,21 @@ const userProfile = new mongoose.Schema({
     type: String,
     required: [true, "Please fill your name"],
   },
-  email: {
-    type: String,
-    required: [true, "Please fill your email"],
-    unique: true,
-    lowercase: true,
-    validate: [validator.isEmail, " Please provide a valid email"],
-  },
+  birthday: Date,
   address: {
     type: String,
     trim: true,
   },
   city: {
     type: String,
-    required: [true, "Please fill your city"],
+
   },
   country: {
     type: String,
-    required: [true, "Please fill your country"],
+ 
   },
-  zipcode: {
-    type: Number,
-    required: [true, "Please fill your zipcode"],
-  },
+  
+  
   userId: {type: Schema.Types.ObjectId, ref: "User", required: true},
 
 

@@ -10,6 +10,9 @@ const hpp = require('hpp');
 const cors = require('cors');
 const bodyParser = require('body-parser')
 const logger = require("morgan");
+const providerRoute = require("./routes/streamingProvider.routes");
+const regserviceRoute = require("./routes/regservice.routes");
+const channelRoute = require("./routes/channel.routes");
 
 
 
@@ -44,7 +47,9 @@ app.use('/api', authRoute)
 const manageRoute = require('./routes/Manage.Routes')
 // app.use('/api', userRoute)
 app.use('/api/manage/', manageRoute)
-
+app.use("/api/provider", providerRoute);
+app.use("/api/regsevice", regserviceRoute);
+app.use("/api/channel", channelRoute);
 
 
 process.on('uncaughtException', err => {
@@ -55,6 +60,7 @@ process.on('uncaughtException', err => {
 
 
 const database = "mongodb+srv://ungsymui:Usm03091991@cluster0.c0navp3.mongodb.net/?retryWrites=true&w=majority";
+//mongodb://127.0.0.1:27017/api_nodejs_l
 
 // Connect the database
 mongoose.connect(database).then(con => {
