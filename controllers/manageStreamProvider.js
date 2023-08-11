@@ -6,8 +6,8 @@ exports.Create = async (req, res, next) => {
     try {
         const { name } = req.body;
         const n = await Sp.findOne({name: name});
-        if(sp){
-            req.status(422).json({
+        if(!Sp){
+            return res.status(422).json({
                 message: "Nha cung cap da ton tai"
             });
         }
@@ -18,7 +18,7 @@ exports.Create = async (req, res, next) => {
           thumbnail: req.file ? req.file.path : null,
           packages: req.body.packages ?req.body.packages:[]
         });
-        res.status(200).json({
+       return res.status(200).json({
             status: "success",
             message: "Tao nha cung cap thanh cong",
           });

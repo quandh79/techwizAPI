@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const ChannelShema = new mongoose.Schema({
+const ProductShema = new mongoose.Schema({
   name: { type: String, require: true },
   description: { type: String, require: true },
   providers: { type: Array },
@@ -8,6 +8,8 @@ const ChannelShema = new mongoose.Schema({
   thumbnail: {
     type: String,
   },
+  thumbnail:String,
+  
 });
 
-module.exports = mongoose.model("Channel", ChannelShema);
+module.exports = mongoose.model("Product", ProductShema);

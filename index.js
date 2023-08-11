@@ -12,11 +12,10 @@ const bodyParser = require('body-parser')
 const logger = require("morgan");
 const providerRoute = require("./routes/streamingProvider.routes");
 const regserviceRoute = require("./routes/regservice.routes");
-const channelRoute = require("./routes/channel.routes");
+const ProductRoute = require("./routes/product.routes");
 
 
 
-const userRoutes = require('./routes/Manage.Routes');
 const globalErrHandler = require('./controllers/errorController');
 const AppError = require('./utils/appError');
 dotenv.config({
@@ -49,7 +48,7 @@ const manageRoute = require('./routes/Manage.Routes')
 app.use('/api/manage/', manageRoute)
 app.use("/api/provider", providerRoute);
 app.use("/api/regsevice", regserviceRoute);
-app.use("/api/channel", channelRoute);
+app.use("/api/product", ProductRoute);
 
 
 process.on('uncaughtException', err => {
