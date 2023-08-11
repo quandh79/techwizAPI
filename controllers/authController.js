@@ -167,9 +167,57 @@ exports.sendOTP = async (req,res,next) =>{
     res.status(500).json(err.message)
   }
 }
+exports.updateProfile = async(req,res) => {
+  try{
+    const {name, tel, birthday,address,city,country} = req.body
+  const user = await req.user
+  const userId = {userId:user.id}
+  const update = {
+    name,
+    tel,
+    birthday,
+    address,
+    city,
+    country
+  }
+  await UserProfile.findOneAndUpdate(userId,update)
+  const profile = await UserProfile.findOne({userId:user.id})
+  return res.status(201).json({message:"Success",data:profile})
+  }catch(err){
+    res.status(500).json(err.message)
+  }
+}
 
+exports.getProfile = async(req,res) =>{
+  try{
+    const user = await req.user
+    console.log(user)
+  const profile = await UserProfile.findOne({userId:user._id}).populate('userId')
+  return res.status(200).json({
+    data:{
+      profile
+    }
+  })
+  }catch(err){
+res.status(500).json(err.message)
+  }
+}
 
-
+exports.delete = async (req,res) => {
+  try{
+const {password} = req.body
+const user = await req.user
+const correctPassword = await bcrypt.compare(password, user.password)
+if(!correctPassword) {
+  return res.status(400),json({message:"Password wrong"})
+}
+await UserProfile.findOneAndDelete({userId:user.id})
+await User.findByIdAndDelete(user.id)
+return res.status(200).json({message:"Success"})
+  }catch(err){
+    res.status(500).json(err.message)
+  }
+}
 exports.protect = async (req, res, next) => {
   try {
     // 1) check if the token is there
