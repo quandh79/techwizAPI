@@ -61,8 +61,7 @@ console.log(correctPassword)
 
   
     const token = createToken(user.id);
-    user.token = token;
-    await user.save();
+
     user.password = undefined;
 
     res.status(200).json({
@@ -100,8 +99,6 @@ exports.signup = async (req, res, next) => {
       
     });
     
-    user.token = token;
-    user.save();
     
     const up = await UserProfile.create({
       userId: user._id,

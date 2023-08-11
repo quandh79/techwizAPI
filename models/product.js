@@ -8,7 +8,6 @@ const ProductShema = new mongoose.Schema({
   thumbnail: {
     type: String,
   },
-  thumbnail:String,
   
 });
 
