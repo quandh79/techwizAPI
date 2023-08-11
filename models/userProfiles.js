@@ -7,7 +7,8 @@ const userProfile = new mongoose.Schema({
     type: String,
     required: [true, "Please fill your name"],
   },
-  birthday: Date,
+  birthday: {type:Date},
+  tel:{type:String},
   address: {
     type: String,
     trim: true,
