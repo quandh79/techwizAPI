@@ -8,21 +8,12 @@ const nodemailer = require('nodemailer');
 const bcrypt = require("bcryptjs");
 var validator = require('validator');
 
-class ResetTokenStore {
-  static store = {};
-
-  static set(token, email) {
-    this.store[token] = { email, expires: Date.now() + 10 * 60 * 1000 };
-  }
-
-  static get(token) {
-    return this.store[token];
-  }
-
-  static remove(token) {
-    delete this.store[token];
-  }
-}
+const otp = async () => {
+  const resetToken = Math.floor(100000 + Math.random() * 900000);
+  const currentTime = new Date();
+  const limitedTime = new Date(currentTime.getTime() + 30 * 60000);
+  return { resetToken, limitedTime };
+};
 const createToken = id => {
   return jwt.sign(
     {
@@ -53,6 +44,10 @@ exports.login = async (req, res, next) => {
     const user = await User.findOne({
       email,
     });
+  
+    if (!user) {
+      return res.status(404).json({ message: "Not Found" });
+    }
 const correctPassword = await bcrypt.compare(password, user.password)
 console.log(correctPassword)
     if (!user || !correctPassword) {
@@ -64,21 +59,18 @@ console.log(correctPassword)
       );
     }
 
-    // 3) All correct, send jwt to client
+  
     const token = createToken(user.id);
 
-    // Remove the password from the output
     user.password = undefined;
 
     res.status(200).json({
       status: "success",
       token,
-      data: {
-        user,
-      },
+      
     });
   } catch (err) {
-    next(err);
+    res.status(500).json(err.message)
   }
 };
 
@@ -104,7 +96,7 @@ exports.signup = async (req, res, next) => {
     const user = await User.create({
       email: req.body.email,
       password: hash,
-     
+      
     });
     
     
@@ -131,7 +123,7 @@ exports.signup = async (req, res, next) => {
       },
     });
   } catch (err) {
-    await User.findOneAndDelete({userName:req.body.userName})
+   
     next(err);
   }
 };
@@ -155,72 +147,60 @@ exports.sendOTP = async (req,res,next) =>{
         
       };
       // gen otp
-      const otp = Math.floor(100000 + Math.random()*900000);
+      const data = await otp()
       
       
       
          sendEmail({
           email: email,
           subject: 'Yêu cầu đăng ký tài khoản',
-          message: `Ma xac nhan cua ban la: ${otp}`,
+          message: `Ma xac nhan cua ban la: ${data.resetToken}`,
         });
        
          
       
 
         return res.status(200).json({
-             otp: otp})
+              data})
   
   }catch(err){
-    next(err);
+    res.status(500).json(err.message)
   }
 }
 
 
 
-// exports.protect = async (req, res, next) => {
-//   try {
-//     // 1) check if the token is there
-//     let token;
-//     if (
-//       req.headers.authorization &&
-//       req.headers.authorization.startsWith("Bearer")
-//     ) {
-//       token = req.headers.authorization.split(" ")[1];
-//     }
-//     if (!token) {
-//       return next(
-//         new AppError(
-//           401,
-//           "fail",
-//           "You are not logged in! Please login in to continue",
-//         ),
-//         req,
-//         res,
-//         next,
-//       );
-//     }
+exports.protect = async (req, res, next) => {
+  try {
+    // 1) check if the token is there
+    let token;
+    if (
+      req.headers.authorization &&
+      req.headers.authorization.startsWith("Bearer")
+    ) {
+      token = req.headers.authorization.split(" ")[1];
+    }
+    if (!token) {
+      return res.status(401).json({
+        message: "You are not logged in! Please login in to continue",
+        req,
+        res,
+      });
+    }
+    const decode = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
+    const user = await User.findById(decode.id);
+    if (!user) {
+      return res
+        .status(401)
+        .json({ message: "This user is no longer exist", req, res });
+    }
 
-//     // 2) Verify token
-//     const decode = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
-
-//     // 3) check if the user is exist (not deleted)
-//     const user = await User.findById(decode.id);
-//     if (!user) {
-//       return next(
-//         new AppError(401, "fail", "This user is no longer exist"),
-//         req,
-//         res,
-//         next,
-//       );
-//     }
-
-//     req.user = user;
-//     next();
-//   } catch (err) {
-//     next(err);
-//   }
-// };
+    req.user = user;
+    next();
+  } catch (err) {
+    res.status(500).json(err.message);
+  }
+};
 
 // 
 // exports.restrictTo = (...roles) => {
@@ -272,17 +252,17 @@ exports.forgotPassword = async (req, res, next) => {
       );
     }
 
-    const resetToken = Math.floor(100000 + Math.random() * 900000);
+    const data =await otp();
     ResetTokenStore.set(resetToken, email);
     console.log(resetToken);
     await sendEmail({
       email: user.email,
       subject: "Yêu cầu đặt lại mật khẩu",
-      message: `Ma xac nhan cua ban la: ${resetToken}`,
+      message: `Ma xac nhan cua ban la: ${data.resetToken}`,
     });
 
     res.status(200).json({
-      resetToken:resetToken,
+      data,
       status: "success",
       message: "Mã token đã được gửi đến email của bạn",
     });
@@ -293,28 +273,17 @@ exports.forgotPassword = async (req, res, next) => {
 
 exports.resetPassword = async (req, res, next) => {
   try {
-    const { token, newPassword, confirmPassword } = req.body;
-
-    const stored = ResetTokenStore.get(token);
-
-    if (stored && Date.now() < stored.expires) {
+    const {  newPassword, confirmPassword } = req.body;
       if (confirmPassword === newPassword) {
         const hashedPassword = await bcrypt.hash(newPassword, 10);
-        const user = await UserProfile.findOne({ email: stored.email });
-        await User.updateOne(
-          { _id: user.userId },
-          { password: hashedPassword }
-        );
-        ResetTokenStore.remove(token);
+        await UserProfile.findOneAndUpdate({ email: stored.email ,password: hashedPassword });
         res
           .status(200)
           .json({ success: true, message: "Đặt lại mật khẩu thành công" });
       }
       res.status(403).json({ error: "mật khẩu xác nhận không đúng" });
-    } else {
-      res.status(403).json({ error: "mã xác nhận không đúng hoặc đã hết hạn" });
-    }
+    
   } catch (err) {
-    next(err);
+    res.status(500).json(err.message)
   }
 };

@@ -17,10 +17,12 @@ const ejs = require('ejs');
 
 
 
+const ProductRoute = require("./routes/product.routes");
+const fa = require('./routes/favorite.routes');
+const uf = require('./routes/userProfile.route')
 
 
 
-const userRoutes = require('./routes/Manage.Routes');
 const globalErrHandler = require('./controllers/errorController');
 const AppError = require('./utils/appError');
 dotenv.config({
@@ -56,6 +58,10 @@ app.use("/api/regsevice", regserviceRoute);
 app.use("/api/channel", channelRoute);
 const pay = require('./controllers/paymentController')
 app.use('/',pay);
+app.use("/api/product", ProductRoute);
+
+app.use('/api/favorite',fa);
+app.use('/api/userProfile',uf);
 
 
 process.on('uncaughtException', err => {

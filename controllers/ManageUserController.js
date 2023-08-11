@@ -1,6 +1,10 @@
 const User = require('../models/adminModel');
 const base = require('./baseController');
 
+const u = require("../models/users"); 
+const UserProviderServices = require("../models/userProviderServices"); 
+
+
 exports.deleteMe = async (req, res, next) => {
     try {
         await User.findByIdAndUpdate(req.user.id, {
@@ -24,3 +28,25 @@ exports.getUser = base.getOne(User);
 // Don't update password on this 
 exports.updateUser = base.updateOne(User);
 exports.deleteUser = base.deleteOne(User);
+
+
+exports.getUserAndServices = async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    const user = await u.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const services = await UserProviderServices.find({ userId });
+
+    return res.status(200).json({
+      user: user,
+      services: services,
+    });
+  } catch (error) {
+    return res.status(500).json({ message: "Error" });
+  }
+};

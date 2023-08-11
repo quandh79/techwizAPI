@@ -41,7 +41,8 @@ exports.getService = async (req, res) => {
 
 exports.getStreamingProviderById = async (req, res) => {
     try {
-      const { providerId } = req.params;
+      const  { providerId }  = req.body;
+      console.log(providerId);
       const data = await streamingProviders.findById(providerId);
       
       if (!data) {
