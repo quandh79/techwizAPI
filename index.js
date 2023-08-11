@@ -10,9 +10,14 @@ const hpp = require('hpp');
 const cors = require('cors');
 const bodyParser = require('body-parser')
 const logger = require("morgan");
+const providerRoute = require("./routes/streamingProvider.routes");
+const regserviceRoute = require("./routes/regservice.routes");
+const ProductRoute = require("./routes/product.routes");
+const fa = require('./routes/favorite.routes');
+const uf = require('./routes/userProfile.route')
 
 
-const userRoutes = require('./routes/userRoutes');
+
 const globalErrHandler = require('./controllers/errorController');
 const AppError = require('./utils/appError');
 dotenv.config({
@@ -26,11 +31,30 @@ const app = express();
 app.use(cors());
 
 // Set security HTTP headers
+const formData = require('express-form-data');
+
+app.use(formData.parse());
 app.use(helmet());
 app.use(logger('dev'))
 app.use(bodyParser.json());
-const userRoute = require('./routes/userRoutes')
-app.use('/api', userRoute)
+app.use(express.json());
+app.use(express.urlencoded({extended:true}));
+
+
+// const userRoute = require('./routes/userRoutes')
+const authRoute = require('./routes/auth.routes')
+// app.use('/api', userRoute)
+app.use('/api', authRoute)
+const manageRoute = require('./routes/Manage.Routes')
+// app.use('/api', userRoute)
+app.use('/api/manage/', manageRoute)
+app.use("/api/provider", providerRoute);
+app.use("/api/regsevice", regserviceRoute);
+app.use("/api/product", ProductRoute);
+
+app.use('/api/favorite',fa);
+app.use('/api/userProfile',uf);
+
 
 process.on('uncaughtException', err => {
     console.log('UNCAUGHT EXCEPTION!!! shutting down...');
@@ -40,6 +64,7 @@ process.on('uncaughtException', err => {
 
 
 const database = "mongodb+srv://ungsymui:Usm03091991@cluster0.c0navp3.mongodb.net/?retryWrites=true&w=majority";
+//mongodb://127.0.0.1:27017/api_nodejs_l
 
 // Connect the database
 mongoose.connect(database).then(con => {
