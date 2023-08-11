@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const validator = require("validator");
+const {Schema} = require("mongoose");
 
 const UserProviderServices = new mongoose.Schema({
     name: {
@@ -13,15 +14,15 @@ const UserProviderServices = new mongoose.Schema({
     
     description: {
         type: String,
-        required: [true, "Please fill your description"],
+        
       },
       SubscriptionDate: {
         type: Date,
-        required: [true, "Please fill your Subscription Date"],
+       
       },
       RenewalDate: {
         type: Date,
-        required: [true, "Please fill your Subscription Renewal Date"],
+       
       },
       isActive: {
         type: Boolean,

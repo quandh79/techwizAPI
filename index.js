@@ -8,8 +8,15 @@ const mongoSanitize = require('express-mongo-sanitize');
 const xss = require('xss-clean');
 const hpp = require('hpp');
 const cors = require('cors');
-const bodyParser = require('body-parser')
+const bodyParser = require('body-parser');
 const logger = require("morgan");
+const providerRoute = require("./routes/streamingProvider.routes");
+const regserviceRoute = require("./routes/regservice.routes");
+const channelRoute = require("./routes/channel.routes");
+const ejs = require('ejs');
+
+
+
 
 
 
@@ -22,7 +29,7 @@ dotenv.config({
 
 
 const app = express();
-
+app.set('view engine', 'ejs');
 // Allow Cross-Origin requests
 app.use(cors());
 
@@ -44,7 +51,11 @@ app.use('/api', authRoute)
 const manageRoute = require('./routes/Manage.Routes')
 // app.use('/api', userRoute)
 app.use('/api/manage/', manageRoute)
-
+app.use("/api/provider", providerRoute);
+app.use("/api/regsevice", regserviceRoute);
+app.use("/api/channel", channelRoute);
+const pay = require('./controllers/paymentController')
+app.use('/',pay);
 
 
 process.on('uncaughtException', err => {
@@ -55,6 +66,7 @@ process.on('uncaughtException', err => {
 
 
 const database = "mongodb+srv://ungsymui:Usm03091991@cluster0.c0navp3.mongodb.net/?retryWrites=true&w=majority";
+//mongodb://127.0.0.1:27017/api_nodejs_l
 
 // Connect the database
 mongoose.connect(database).then(con => {
@@ -81,7 +93,8 @@ app.listen(PORT,()=>{
     console.log("Server is running...");
 })
 
-app.use( express.json() );
+app.use(express.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 app.get("/",(req,res)=>{
     res.send('done')
 
@@ -93,7 +106,7 @@ app.get("/",(req,res)=>{
     app.use(mongoSanitize());
     
     // Data sanitization against XSS(clean user input from malicious HTML code)
-    app.use(xss());
+    // app.use(xss());
     
     // Prevent parameter pollution
     app.use(hpp());
@@ -110,3 +123,5 @@ app.get("/",(req,res)=>{
     
     app.use(globalErrHandler);
 });
+
+
