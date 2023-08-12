@@ -57,7 +57,7 @@ app.use("/api/provider", providerRoute);
 app.use("/api/regsevice", regserviceRoute);
 app.use("/api/channel", channelRoute);
 const pay = require('./controllers/paymentController')
-//app.use('/',pay);
+app.use('/',pay);
 app.use("/api/product", ProductRoute);
 app.use("/api/feedback", feedbackRoute);
 app.use("/api/favorite", favoriteRoute);
