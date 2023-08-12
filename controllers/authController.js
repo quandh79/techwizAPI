@@ -127,86 +127,6 @@ exports.sendOTP = async (req, res, next) => {
       return res.status(422).json({
         message: "Email da duoc su dung",
       });
-    };
-      
-    
-      const e = validator.isEmail(email);
- 
-      if(!e){
-        return  res.status(422).json({
-          message:"Email khong hop le"
-        });
-        
-      };
-      // gen otp
-      const data = await otp()
-      
-      
-      
-         sendEmail({
-          email: email,
-          subject: 'Yêu cầu đăng ký tài khoản',
-          message: `Ma xac nhan cua ban la: ${data.resetToken}`,
-        });
-       
-         
-      
-
-        return res.status(200).json({
-              data})
-  
-  }catch(err){
-    res.status(500).json(err.message)
-  }
-}
-exports.updateProfile = async(req,res) => {
-  try{
-    const {name, tel, birthday,address,city,country} = req.body
-  const user = await req.user
-  const userId = {userId:user.id}
-  const update = {
-    name,
-    tel,
-    birthday,
-    address,
-    city,
-    country
-  }
-  await UserProfile.findOneAndUpdate(userId,update)
-  const profile = await UserProfile.findOne({userId:user.id})
-  return res.status(201).json({message:"Success",data:profile})
-  }catch(err){
-    res.status(500).json(err.message)
-  }
-}
-
-exports.getProfile = async (req, res) => {
-  try {
-    const user = await req.user;
-    console.log(user);
-    const profile = await UserProfile.findOne({ userId: user._id }).select(
-      "-_id -__v -userId"
-    );
-    console.log(profile);
-    return res.status(200).json({
-      data: {
-        ...profile.toObject(),
-        email: user.email,
-      },
-    });
-  } catch (err) {
-    res.status(500).json(err.message);
-  }
-};
-
-exports.getProfile = async(req,res) =>{
-  try{
-    const user = await req.user
-    console.log(user)
-  const profile = await UserProfile.findOne({userId:user._id}).populate('userId')
-  return res.status(200).json({
-    data:{
-      profile
     }
 
     const e = validator.isEmail(email);
@@ -344,7 +264,7 @@ const sendEmail = async (options) => {
   });
 
   const mailOptions = {
-    from: "quandhte@gmail.com",
+    from: "mailto:quandhte@gmail.com",
     to: options.email,
     subject: options.subject,
     text: options.message,
