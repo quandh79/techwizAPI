@@ -177,10 +177,13 @@ exports.getProfile = async (req, res) => {
   try {
     const user = await req.user;
     console.log(user);
-    const profile = await UserProfile.findOne({ userId: user._id });
+    const profile = await UserProfile.findOne({ userId: user._id }).select(
+      "-_id -__v -userId"
+    );
+    console.log(profile);
     return res.status(200).json({
       data: {
-        ...profile,
+        ...profile.toObject(),
         email: user.email,
       },
     });
