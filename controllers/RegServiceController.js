@@ -43,9 +43,9 @@ exports.registerProviderService = async (req, res, next) => {
   }
 };
 
-exports.isActive = async (req, res) => {
+exports.isActive = async (id) => {
   try {
-    const { id } = req.body;
+    // const { id } = req.body;
     const currentDate = new Date();
     const renewalDate = new Date(
       currentDate.getTime() + 30 * 24 * 60 * 60 * 1000
