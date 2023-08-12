@@ -61,7 +61,7 @@ exports.getProductProviders = async (req, res) => {
         const result = await Provider.find({ _id: { $in: item.id } }).populate(
           "packages"
         );
-        
+
         const filteredPackages = result.map((provider) => ({
           ...provider.toObject(),
           packages: provider.packages.filter(
