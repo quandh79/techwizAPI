@@ -17,21 +17,45 @@ exports.Create = async (req, res, next) => {
         const sp = await Sp.create({
           name: name,
           description: req.body.description,
-          
+          thumbnail:"/uploads/streamprovider/"+file.thumbnail.name,
           packages: req.body.packages ?req.body.packages:[]
         });
-        console.log(file);
-        if(file)
-        sp.thumbnail =  "/uploads/streamprovider/"+file.thumbnail.name;
-        await sp.save();
        return res.status(201).json({
+            sp,
             status: "success",
             message: "Tao nha cung cap thanh cong",
           });
     }catch(err){
-        next(err)
+        err.message
     }
-}  
+};
+
+exports.uploadFile = async (req,res, next) => {
+    try {
+        const { id } = req.params;
+        console.log(id)
+        const file = req.file;
+        console.log(file)
+
+        const c = await Sp.findById(id);
+        console.log(c)
+        if(!c){
+            return res.status(422).json({
+                message:"not found"
+            })
+        }
+        if(file) 
+        c.thumbnail =  "/uploads/streamprovider/"+file.thumbnail.name;
+        await c.save();
+        return res.status(200).json({
+            c
+        })
+    }catch(err){
+        res.status(500).json({
+            message:(err)
+        })
+    }
+}
        
 
 exports.getOne = base.getOne(Sp);

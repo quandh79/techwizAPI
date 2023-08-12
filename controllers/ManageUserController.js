@@ -1,4 +1,4 @@
-const User = require('../models/adminModel');
+const User = require('../models/users');
 const base = require('./baseController');
 
 const u = require("../models/users"); 
@@ -41,6 +41,27 @@ exports.getUserAndServices = async (req, res) => {
     }
 
     const services = await UserProviderServices.find({ userId });
+
+    return res.status(200).json({
+      user: user,
+      services: services,
+    });
+  } catch (error) {
+    return res.status(500).json({ message: "Error" });
+  }
+};
+
+exports.getUserAndServicesByName= async (req, res) => {
+  try {
+    const { name } = req.body;
+
+    const user = await u.findOne({name:name});
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const services = await UserProviderServices.find({ userId:user.id });
 
     return res.status(200).json({
       user: user,
