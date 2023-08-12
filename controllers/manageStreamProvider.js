@@ -1,24 +1,30 @@
 const base = require('./baseController');
-const Sp = require('../models/streamingProviders')
+const Sp = require('../models/streamingProviders');
 
 exports.getAllStreamProvider = base.getAll(Sp);
+
 exports.Create = async (req, res, next) => {
     try {
         const { name } = req.body;
+        console.log(req.body);
         const n = await Sp.findOne({name: name});
         if(!Sp){
             return res.status(422).json({
                 message: "Nha cung cap da ton tai"
             });
         }
-        
+        const file = req.files;
         const sp = await Sp.create({
           name: name,
           description: req.body.description,
-          thumbnail: req.file ? req.file.path : null,
+          
           packages: req.body.packages ?req.body.packages:[]
         });
-       return res.status(200).json({
+        console.log(file);
+        if(file)
+        sp.thumbnail =  "/uploads/streamprovider/"+file.thumbnail.name;
+        await sp.save();
+       return res.status(201).json({
             status: "success",
             message: "Tao nha cung cap thanh cong",
           });
@@ -32,6 +38,7 @@ exports.getOne = base.getOne(Sp);
 exports.Update = async (req, res, next) => {
     try {
         const { name } = req.body;
+        console.log(req.body)
         const n = Sp.findOne({name: name});
         if(sp){
             req.status(422).json({

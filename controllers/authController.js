@@ -188,6 +188,25 @@ exports.updateProfile = async(req,res) => {
   }
 }
 
+exports.getProfile = async (req, res) => {
+  try {
+    const user = await req.user;
+    console.log(user);
+    const profile = await UserProfile.findOne({ userId: user._id }).select(
+      "-_id -__v -userId"
+    );
+    console.log(profile);
+    return res.status(200).json({
+      data: {
+        ...profile.toObject(),
+        email: user.email,
+      },
+    });
+  } catch (err) {
+    res.status(500).json(err.message);
+  }
+};
+
 exports.getProfile = async(req,res) =>{
   try{
     const user = await req.user

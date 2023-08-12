@@ -37,9 +37,14 @@ app.use(formData.parse());
 app.use(helmet());
 app.use(logger('dev'))
 app.use(bodyParser.json());
+app.use(express.static("public"));
 app.use(express.json());
 app.use(express.urlencoded({extended:true}));
-
+app.use(
+    bodyParser.urlencoded({
+      extended: true,
+    })
+  );
 
 // const userRoute = require('./routes/userRoutes')
 const authRoute = require('./routes/auth.routes')
@@ -62,6 +67,14 @@ process.on('uncaughtException', err => {
     process.exit(1);
 });
 
+app.post('/upload', (req, res) => {
+    // Access the uploaded files through req.files
+    console.log(req.file);
+  
+    // Do something with the uploaded files
+  
+    res.send('File uploaded successfully');
+  });
 
 const database = "mongodb+srv://ungsymui:Usm03091991@cluster0.c0navp3.mongodb.net/?retryWrites=true&w=majority";
 //mongodb://127.0.0.1:27017/api_nodejs_l

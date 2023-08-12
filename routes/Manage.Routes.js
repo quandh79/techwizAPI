@@ -10,13 +10,17 @@ const multer = require("multer");
 // chon thu muc muon luu anh
 const storage = multer.diskStorage({
     destination: function (req,file,cb){
-        cb(null,'/uploads/streamprovider');
+        cb(null,'public/uploads/streamprovider');
     },
     filename: function (req,file,cb){
         cb(null,Date.now()+"-"+file.originalname);
     }
 });
 const upload = multer({storage:storage});
+
+
+
+
 
 router.post('/login', authAdminController.login);
 router.post('/signup', authAdminController.signup);
@@ -47,7 +51,7 @@ router
 
 router.get('/stream-provider/getall', managePv.getAllStreamProvider);
 router.get('/stream-provider/getone/:id',managePv.getOne);
-router.post('/stream-provider/create',managePv.Create);
+router.post('/stream-provider/create',upload.single("avatar"),managePv.Create);
 router.patch('/stream-provider/update/:id',managePv.Update);
 router.post('/stream-provider/delete/:id',managePv.deleteMe)
 
