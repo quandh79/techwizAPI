@@ -13,6 +13,8 @@ const logger = require("morgan");
 const providerRoute = require("./routes/streamingProvider.routes");
 const regserviceRoute = require("./routes/regservice.routes");
 const ProductRoute = require("./routes/product.routes");
+const fa = require('./routes/favorite.routes');
+const uf = require('./routes/userProfile.route')
 
 
 
@@ -49,6 +51,9 @@ app.use('/api/manage/', manageRoute)
 app.use("/api/provider", providerRoute);
 app.use("/api/regsevice", regserviceRoute);
 app.use("/api/product", ProductRoute);
+
+app.use('/api/favorite',fa);
+app.use('/api/userProfile',uf);
 
 
 process.on('uncaughtException', err => {
