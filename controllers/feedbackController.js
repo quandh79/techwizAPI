@@ -25,7 +25,7 @@ exports.createFeedback = async (req, res) => {
   }
 };
 
-exporst.getActive = async (req, res) => {
+exports.getActive = async (req, res) => {
   try {
     const listFeedback = await feedback.find({ isActive: true });
     if (listFeedback.length < 1) {
