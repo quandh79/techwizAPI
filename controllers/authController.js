@@ -3,10 +3,10 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/users");
 const UserProfile = require("../models/userProfiles");
 const AppError = require("../utils/appError");
-const crypto = require('crypto');
-const nodemailer = require('nodemailer');
+const crypto = require("crypto");
+const nodemailer = require("nodemailer");
 const bcrypt = require("bcryptjs");
-var validator = require('validator');
+var validator = require("validator");
 
 const otp = async () => {
   const resetToken = Math.floor(100000 + Math.random() * 900000);
@@ -14,7 +14,7 @@ const otp = async () => {
   const limitedTime = new Date(currentTime.getTime() + 30 * 60000);
   return { resetToken, limitedTime };
 };
-const createToken = id => {
+const createToken = (id) => {
   return jwt.sign(
     {
       id,
@@ -22,7 +22,7 @@ const createToken = id => {
     process.env.JWT_SECRET,
     {
       expiresIn: process.env.JWT_EXPIRES_IN,
-    },
+    }
   );
 };
 
@@ -36,7 +36,7 @@ exports.login = async (req, res, next) => {
         new AppError(404, "fail", "Please provide email or password"),
         req,
         res,
-        next,
+        next
       );
     }
 
@@ -44,22 +44,21 @@ exports.login = async (req, res, next) => {
     const user = await User.findOne({
       email,
     });
-  
+
     if (!user) {
       return res.status(404).json({ message: "Not Found" });
     }
-const correctPassword = await bcrypt.compare(password, user.password)
-console.log(correctPassword)
+    const correctPassword = await bcrypt.compare(password, user.password);
+    console.log(correctPassword);
     if (!user || !correctPassword) {
       return next(
         new AppError(401, "fail", "Email or Password is wrong"),
         req,
         res,
-        next,
+        next
       );
     }
 
-  
     const token = createToken(user.id);
 
     user.password = undefined;
@@ -67,157 +66,144 @@ console.log(correctPassword)
     res.status(200).json({
       status: "success",
       token,
-      
     });
   } catch (err) {
-    res.status(500).json(err.message)
+    res.status(500).json(err.message);
   }
 };
 
 exports.signup = async (req, res, next) => {
   try {
-    
-    const e = await User.findOne({email:req.body.email});
-    if(e){
+    const e = await User.findOne({ email: req.body.email });
+    if (e) {
       res.status(422).json({
-        message:"Email da duoc su dung"
-      })
-      return
+        message: "Email da duoc su dung",
+      });
+      return;
     }
-   
-    if(req.body.password != req.body.passwordConfirm){return res.status(422).json({
-      message:"Mat khau xac nhan khong dung"
-    })
-     
-  }
+
+    if (req.body.password != req.body.passwordConfirm) {
+      return res.status(422).json({
+        message: "Mat khau xac nhan khong dung",
+      });
+    }
     const salt = await bcrypt.genSalt(10);
-    const hash = await bcrypt.hash(req.body.password,salt); 
-    
+    const hash = await bcrypt.hash(req.body.password, salt);
+
     const user = await User.create({
       email: req.body.email,
       password: hash,
-      
     });
-    
-    
+
     const up = await UserProfile.create({
       userId: user._id,
-      name:req.body.name,
-      birthday:req.body.birthday,
-      address:req.body.address,
-      city:req.body.city,
-      country:req.body.country,
-     
-
-    })
+      name: req.body.name,
+      birthday: req.body.birthday,
+      address: req.body.address,
+      city: req.body.city,
+      country: req.body.country,
+    });
 
     const token = createToken(user.id);
 
     user.password = undefined;
-    user.UserProfile = up
+    user.UserProfile = up;
     res.status(201).json({
       status: "success",
       token,
       data: {
-        user
+        user,
       },
     });
   } catch (err) {
-   
     next(err);
   }
 };
-exports.sendOTP = async (req,res,next) =>{
-  try{
-      const { email } = req.body;
-      const c = await User.findOne({email:email});
-    if(c){
-      return  res.status(422).json({
-        message:"Email da duoc su dung"
+exports.sendOTP = async (req, res, next) => {
+  try {
+    const { email } = req.body;
+    const c = await User.findOne({ email: email });
+    if (c) {
+      return res.status(422).json({
+        message: "Email da duoc su dung",
       });
-    };
-      
-    
-      const e = validator.isEmail(email);
- 
-      if(!e){
-        return  res.status(422).json({
-          message:"Email khong hop le"
-        });
-        
-      };
-      // gen otp
-      const data = await otp()
-      
-      
-      
-         sendEmail({
-          email: email,
-          subject: 'Yêu cầu đăng ký tài khoản',
-          message: `Ma xac nhan cua ban la: ${data.resetToken}`,
-        });
-       
-         
-      
-
-        return res.status(200).json({
-              data})
-  
-  }catch(err){
-    res.status(500).json(err.message)
-  }
-}
-exports.updateProfile = async(req,res) => {
-  try{
-    const {name, tel, birthday,address,city,country} = req.body
-  const user = await req.user
-  const userId = {userId:user.id}
-  const update = {
-    name,
-    tel,
-    birthday,
-    address,
-    city,
-    country
-  }
-  await UserProfile.findOneAndUpdate(userId,update)
-  const profile = await UserProfile.findOne({userId:user.id})
-  return res.status(201).json({message:"Success",data:profile})
-  }catch(err){
-    res.status(500).json(err.message)
-  }
-}
-
-exports.getProfile = async(req,res) =>{
-  try{
-    const user = await req.user
-    console.log(user)
-  const profile = await UserProfile.findOne({userId:user._id}).populate('userId')
-  return res.status(200).json({
-    data:{
-      profile
     }
-  })
-  }catch(err){
-res.status(500).json(err.message)
-  }
-}
 
-exports.delete = async (req,res) => {
-  try{
-const {password} = req.body
-const user = await req.user
-const correctPassword = await bcrypt.compare(password, user.password)
-if(!correctPassword) {
-  return res.status(400),json({message:"Password wrong"})
-}
-await UserProfile.findOneAndDelete({userId:user.id})
-await User.findByIdAndDelete(user.id)
-return res.status(200).json({message:"Success"})
-  }catch(err){
-    res.status(500).json(err.message)
+    const e = validator.isEmail(email);
+
+    if (!e) {
+      return res.status(422).json({
+        message: "Email khong hop le",
+      });
+    }
+    // gen otp
+    const data = await otp();
+
+    sendEmail({
+      email: email,
+      subject: "Yêu cầu đăng ký tài khoản",
+      message: `Ma xac nhan cua ban la: ${data.resetToken}`,
+    });
+
+    return res.status(200).json({
+      data,
+    });
+  } catch (err) {
+    res.status(500).json(err.message);
   }
-}
+};
+exports.updateProfile = async (req, res) => {
+  try {
+    const { name, tel, birthday, address, city, country } = req.body;
+    const user = await req.user;
+    const userId = { userId: user.id };
+    const update = {
+      name,
+      tel,
+      birthday,
+      address,
+      city,
+      country,
+    };
+    await UserProfile.findOneAndUpdate(userId, update);
+    const profile = await UserProfile.findOne({ userId: user.id });
+    return res.status(201).json({ message: "Success", data: profile });
+  } catch (err) {
+    res.status(500).json(err.message);
+  }
+};
+
+exports.getProfile = async (req, res) => {
+  try {
+    const user = await req.user;
+    console.log(user);
+    const profile = await UserProfile.findOne({ userId: user._id });
+    return res.status(200).json({
+      data: {
+        ...profile,
+        email: user.email,
+      },
+    });
+  } catch (err) {
+    res.status(500).json(err.message);
+  }
+};
+
+exports.delete = async (req, res) => {
+  try {
+    const { password } = req.body;
+    const user = await req.user;
+    const correctPassword = await bcrypt.compare(password, user.password);
+    if (!correctPassword) {
+      return res.status(400), json({ message: "Password wrong" });
+    }
+    await UserProfile.findOneAndDelete({ userId: user.id });
+    await User.findByIdAndDelete(user.id);
+    return res.status(200).json({ message: "Success" });
+  } catch (err) {
+    res.status(500).json(err.message);
+  }
+};
 exports.protect = async (req, res, next) => {
   try {
     // 1) check if the token is there
@@ -250,7 +236,7 @@ exports.protect = async (req, res, next) => {
   }
 };
 
-// 
+//
 // exports.restrictTo = (...roles) => {
 //   return (req, res, next) => {
 //     if (!roles.includes(req.user.role)) {
@@ -267,7 +253,7 @@ exports.protect = async (req, res, next) => {
 
 const sendEmail = async (options) => {
   const transporter = nodemailer.createTransport({
-    service: 'Gmail',
+    service: "Gmail",
     auth: {
       user: process.env.EMAIL_USERNAME,
       pass: process.env.EMAIL_PASSWORD,
@@ -275,7 +261,7 @@ const sendEmail = async (options) => {
   });
 
   const mailOptions = {
-    from: 'quandhte@gmail.com',
+    from: "quandhte@gmail.com",
     to: options.email,
     subject: options.subject,
     text: options.message,
@@ -289,7 +275,7 @@ exports.forgotPassword = async (req, res, next) => {
     const { email } = req.body;
 
     // 1) Tìm user dựa trên email
-    const user = await UserProfile.findOne({ email:email });
+    const user = await UserProfile.findOne({ email: email });
     if (!user) {
       return next(
         new AppError(
@@ -300,7 +286,7 @@ exports.forgotPassword = async (req, res, next) => {
       );
     }
 
-    const data =await otp();
+    const data = await otp();
     ResetTokenStore.set(resetToken, email);
     console.log(resetToken);
     await sendEmail({
@@ -321,17 +307,19 @@ exports.forgotPassword = async (req, res, next) => {
 
 exports.resetPassword = async (req, res, next) => {
   try {
-    const {  newPassword, confirmPassword } = req.body;
-      if (confirmPassword === newPassword) {
-        const hashedPassword = await bcrypt.hash(newPassword, 10);
-        await UserProfile.findOneAndUpdate({ email: stored.email ,password: hashedPassword });
-        res
-          .status(200)
-          .json({ success: true, message: "Đặt lại mật khẩu thành công" });
-      }
-      res.status(403).json({ error: "mật khẩu xác nhận không đúng" });
-    
+    const { newPassword, confirmPassword } = req.body;
+    if (confirmPassword === newPassword) {
+      const hashedPassword = await bcrypt.hash(newPassword, 10);
+      await UserProfile.findOneAndUpdate({
+        email: stored.email,
+        password: hashedPassword,
+      });
+      res
+        .status(200)
+        .json({ success: true, message: "Đặt lại mật khẩu thành công" });
+    }
+    res.status(403).json({ error: "mật khẩu xác nhận không đúng" });
   } catch (err) {
-    res.status(500).json(err.message)
+    res.status(500).json(err.message);
   }
 };
