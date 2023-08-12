@@ -112,7 +112,7 @@ exports.signup = async (req, res, next) => {
       status: "success",
       token,
       data: {
-        user,
+        user:up
       },
     });
   } catch (err) {

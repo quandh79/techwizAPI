@@ -12,6 +12,11 @@ const bodyParser = require("body-parser");
 const logger = require("morgan");
 const providerRoute = require("./routes/streamingProvider.routes");
 const regserviceRoute = require("./routes/regservice.routes");
+const channelRoute = require("./routes/channel.routes");
+const ejs = require('ejs');
+
+
+
 const ProductRoute = require("./routes/product.routes");
 const feedbackRoute = require("./routes/feedback.routes");
 const fa = require("./routes/favorite.routes");
@@ -26,7 +31,7 @@ dotenv.config({
 });
 
 const app = express();
-
+app.set('view engine', 'ejs');
 // Allow Cross-Origin requests
 app.use(cors());
 
@@ -50,6 +55,9 @@ const manageRoute = require("./routes/Manage.Routes");
 app.use("/api/manage/", manageRoute);
 app.use("/api/provider", providerRoute);
 app.use("/api/regsevice", regserviceRoute);
+app.use("/api/channel", channelRoute);
+const pay = require('./controllers/paymentController')
+app.use('/',pay);
 app.use("/api/product", ProductRoute);
 app.use("/api/feedback", feedbackRoute);
 app.use("/api/favorite", fa);
@@ -115,5 +123,4 @@ app.get("/", (req, res) => {
     const err = new AppError(404, "fail", "undefined route");
     next(err, req, res, next);
   });
-
 
