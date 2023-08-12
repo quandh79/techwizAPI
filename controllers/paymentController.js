@@ -7,6 +7,7 @@ const { protect } = require('./authAdminController');
 const { isActive } = require('./RegServiceController');
 const router = express.Router();
 const UserProviderServices = require("../models/userProviderServices")
+const BASE_URL = process.env.BASE_URL;
 
 paypal.configure({
     'mode': 'sandbox', //sandbox or live
@@ -14,14 +15,14 @@ paypal.configure({
     'client_secret': 'ENR3gDRecvDCf2k9imwW2VyvP662n3AYD1WhzmDcZl_aGotYMay4jtd0kfAp6fKE6BlUOEVGjQAWkfp1'
 })
 
-router.get('/', async (req, res) => { 
-    const{providerId,code} = req.query;//?id=bbbb&
-    // const user = req.user
+router.get('/paypal', async (req, res) => { 
+    const{providerId,code,userId} = req.query;//?id=bbbb&
+    // const user = t
 
 
     
-    const userData = await userProfiles.findOne({userId:"64d62dd9087c52157ce879b0"});
-    const providerData= await streamingProviders.findById("64d4c7f09ef9f5dc7191b3af");
+    const userData = await userProfiles.findOne({userId:userId});
+    const providerData= await streamingProviders.findById(providerId);
     const packageData = await providerData.packages.filter(
         (pkg) => pkg.code === "ba"
       )[0];
@@ -55,8 +56,8 @@ router.get('/pay', (req, res) => {
             "payment_method": "paypal"
         },
         "redirect_urls": {
-            "return_url": `http://localhost:3000/success?psId=${psId}`,
-            "cancel_url": "http://localhost:3000/cancel"
+            "return_url": `${BASE_URL}/success?psId=${psId}`,
+            "cancel_url": `${BASE_URL}/cancel`
         },
         "transactions": [{
             "amount": {
@@ -91,32 +92,9 @@ router.get('/pay', (req, res) => {
 
 router.get('/success', (req, res) => {
     const{psId}=req.query;
-    console.log("đến đây");
-    const payerId = req.query.PayerID;
-    const paymentId = req.query.paymentId;
-    // const {id} = req.ps._id
-    // console.log(req.ps)
-    // console.log(id)
+    isActive(psId)
+    res.render('success');
 
-    const execute_payment_json = {
-        "payer_id": payerId,
-        "transactions": [{
-            "amount": {
-                "currency": "USD",
-                "total": "26.00"
-            }
-        }]
-    };
-    paypal.payment.execute(paymentId, execute_payment_json, function(error, payment) {
-        if (error) {
-            console.log(error.response);
-            throw error;
-        } else {
-            console.log(JSON.stringify(payment));
-             isActive(psId)
-            res.render('../views/success');
-        }
-    });
 });
 
 router.get('/cancel',(req,res) => res.render('../views/cancel'));
