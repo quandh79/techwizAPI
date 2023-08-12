@@ -37,7 +37,7 @@ exports.getActive = async (req, res) => {
   }
 };
 
-exporst.get = async (req, res) => {
+exports.get = async (req, res) => {
   try {
     const listFeedback = await feedback.find();
     if (listFeedback.length < 1) {
