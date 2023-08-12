@@ -24,15 +24,11 @@ exports.createProduct = async (req, res) => {
 };
 exports.getProduct = async (req, res) => {
   try {
-    const { search } = req.body;
-    if (search) {
+    const { providerId } = req.params;
+    console.log(providerId)
+    if (providerId) {
       const data = await Product.find({
-        $or: [
-          { name: new RegExp(search, "i") },
-          {
-            category: new RegExp(search, "i"),
-          },
-        ],
+        providers: { $elemMatch: { id: providerId } },
       });
       if (!data) {
         return res.status(404).json({ message: "Not Found" });

@@ -19,8 +19,8 @@ const ejs = require('ejs');
 
 const ProductRoute = require("./routes/product.routes");
 const feedbackRoute = require("./routes/feedback.routes");
-const fa = require("./routes/favorite.routes");
-const uf = require("./routes/userProfile.route");
+const favoriteRoute = require("./routes/favorite.routes");
+const userProfile = require("./routes/userProfile.route");
 const globalErrHandler = require("./controllers/errorController");
 const multer = require("multer");
 
@@ -57,11 +57,11 @@ app.use("/api/provider", providerRoute);
 app.use("/api/regsevice", regserviceRoute);
 app.use("/api/channel", channelRoute);
 const pay = require('./controllers/paymentController')
-app.use('/',pay);
+//app.use('/',pay);
 app.use("/api/product", ProductRoute);
 app.use("/api/feedback", feedbackRoute);
-app.use("/api/favorite", fa);
-app.use("/api/userProfile", uf);
+app.use("/api/favorite", favoriteRoute);
+app.use("/api/userProfile", userProfile);
 
 
 process.on("uncaughtException", (err) => {

@@ -1,7 +1,7 @@
 const User = require('../models/users');
 const base = require('./baseController');
 
-const u = require("../models/users"); 
+const userProfile = require("../models/userProfiles"); 
 const UserProviderServices = require("../models/userProviderServices"); 
 
 
@@ -22,8 +22,45 @@ exports.deleteMe = async (req, res, next) => {
     }
 };
 
-exports.getAllUsers = base.getAll(User);
-exports.getUser = base.getOne(User);
+exports.getAllUsers = async (req,res,next)=>{
+  try {
+    
+    const data = await userProfile.find().populate(
+      "userId"
+    )
+ 
+    res.status(200).json({
+        message:"Success",
+        data
+
+    });
+
+
+} catch (error) {
+    next(error);
+}
+
+};
+exports.getUser = async (req,res,next)=>{
+  try {
+    const { id } = req.params;
+    console.log(id)
+    
+    const data = await UserProviderServices.findOne({userId:id});
+    const dataUser = await userProfile.findOne({userId:id});
+      console.log(data)
+    return res.status(200).json({
+        message:"Success",
+        data,
+        dataUser
+
+    });
+
+} catch (error) {
+   error.message;
+}
+
+};
 
 // Don't update password on this 
 exports.updateUser = base.updateOne(User);
@@ -51,23 +88,24 @@ exports.getUserAndServices = async (req, res) => {
   }
 };
 
-exports.getUserAndServicesByName= async (req, res) => {
-  try {
-    const { name } = req.body;
+// exports.getAll = Model => async (req, res, next) => {
+//   try {
+//       const features = new APIFeatures(Model.find(), req.query)
+//           .sort()
+//           .paginate();
 
-    const user = await u.findOne({name:name});
+//       const doc = await features.query;
 
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
+//       res.status(200).json({
+//           status: 'success',
+//           results: doc.length,
+//           data: {
+//               data: doc
+//           }
+//       });
 
-    const services = await UserProviderServices.find({ userId:user.id });
+//   } catch (error) {
+//       next(error);
+//   }
 
-    return res.status(200).json({
-      user: user,
-      services: services,
-    });
-  } catch (error) {
-    return res.status(500).json({ message: "Error" });
-  }
-};
+// };
