@@ -5,6 +5,7 @@ const authController = require('./../controllers/authController');
 const usermanage = require("../controllers/ManageUserController");
 const authAdminController = require('../controllers/authAdminController');
 const managePv = require('../controllers/manageStreamProvider')
+const manageU = require('../controllers/userProfileController')
 
 const multer = require("multer");
 // chon thu muc muon luu anh
@@ -40,11 +41,7 @@ router
     .get(usermanage.getAllUsers);
 
 
-router
-    .route('/:id')
-    .get(usermanage.getUser)
-    .patch(usermanage.updateUser)
-    .delete(usermanage.deleteUser);
+router.get('/getUser/:id',usermanage.getUser);
 
 
     // manage streamProder
