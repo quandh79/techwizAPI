@@ -8,8 +8,6 @@ const ProductShema = new mongoose.Schema({
   thumbnail: {
     type: String,
   },
-  thumbnail:String,
-  
 });
 
 module.exports = mongoose.model("Product", ProductShema);
