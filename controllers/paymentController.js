@@ -55,7 +55,7 @@ router.get('/pay', (req, res) => {
             "payment_method": "paypal"
         },
         "redirect_urls": {
-            "return_url": "http://localhost:3000/success&psId=<%=psId%>",
+            "return_url": `http://localhost:3000/success?psId=${psId}`,
             "cancel_url": "http://localhost:3000/cancel"
         },
         "transactions": [{
@@ -91,7 +91,7 @@ router.get('/pay', (req, res) => {
 
 router.get('/success', (req, res) => {
     const{psId}=req.query;
-
+    console.log("đến đây");
     const payerId = req.query.PayerID;
     const paymentId = req.query.paymentId;
     // const {id} = req.ps._id
