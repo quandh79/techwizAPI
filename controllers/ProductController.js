@@ -55,38 +55,30 @@ exports.getProductProviders = async (req, res) => {
       return res.status(404).json({ message: "Product not found" });
     }
     const providers = product.providers;
-    var id = [];
-    var service = [];
+    let pro = [];
     await Promise.all(
       providers.map(async (item) => {
-        service.push(item.service);
-        id.push(item.id);
+        const result = await Provider.find({ _id: { $in: item.id } }).populate(
+          "packages"
+        );
+
+        const filteredPackages = result.map((provider) => ({
+          ...provider.toObject(),
+          packages: provider.packages.filter(
+            (package) => package.code === item.service
+          ),
+        }));
+        pro = pro.concat(filteredPackages);
+        return filteredPackages;
       })
     );
-
-    console.log(id);
-    console.log(service);
-    const pro = await Provider.find({ _id: { $in: providerIds["id"] } });
-    // providerIds.map(async item=>{
-    //   return(
-    //      pro = await Provider.findA(item)
-
-    //     )
-
-    // })
-
-    console.log(pro);
-    // const providers = await Provider.find({
-    //   _id: { $in: providerIds },
-    // });
-    // console.log("okkkkkk",providers)
-    // if (!providers || providers.length === 0) {
-    //   return res.status(422).json({
-    //     message: "No providers found",
-    //   });
-    // }
-    return res.status(200).json({
-      providers: providers,
+    pro.forEach((provider) => {
+      return res.status(200).json({
+        data: {
+          product,
+          provider,
+        },
+      });
     });
   } catch (error) {
     return res.status(500).json(error.message);
