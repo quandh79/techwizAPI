@@ -1,7 +1,5 @@
-const favorite = require("../models/favorite");
 const Product = require("../models/product");
 const Provider = require("../models/streamingProviders");
-const { login } = require("./authController");
 const favorite = require("../models/favorite");
 exports.createProduct = async (req, res) => {
   try {
@@ -64,27 +62,28 @@ exports.getProductProviders = async (req, res) => {
   try {
     const user = req.user;
     const { productId } = req.body;
+    let isProductSaved = false;
     const product = await Product.findById(productId);
-    console.log(product._id);
     const populateProduct = await Product.find({ category: product.category });
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
     }
-    const fav = await favorite.find({
-      productId: productId,
+    const fav = await favorite.findOne({
+      userId: user.id,
     });
-    console.log(productId);
-    console.log(fav);
-    console.log(product);
-    if (!fav || fav.length === 0) {
+    for (const p of fav.productId) {
+      console.log(p.toString() === productId);
+      if (p.toString() === productId) {
+        product.isSave = true;
+        await product.save();
+        isProductSaved = true;
+        break;
+      }
+    }
+    if (!isProductSaved) {
       product.isSave = false;
       await product.save();
-      console.log(product);
-    } else {
-      product.isSave = true;
-      await product.save();
     }
-
     const providers = product.providers;
     let pro = [];
     await Promise.all(
@@ -109,24 +108,6 @@ exports.getProductProviders = async (req, res) => {
         product,
         provider: pro,
         populateProduct,
-      },
-    });
-  } catch (error) {
-    return res.status(500).json(error.message);
-  }
-};
-
-exports.getProduct = async (req, res) => {
-  try {
-    //const { productId } = req.body;
-    const product = await Product.find();
-    if (!product) {
-      return res.status(404).json({ message: "Product not found" });
-    }
-
-    return res.status(200).json({
-      data: {
-        product,
       },
     });
   } catch (error) {

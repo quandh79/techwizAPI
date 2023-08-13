@@ -1,8 +1,5 @@
-const UserProfile = require("../models/userProfiles");
 const User = require("../models/users");
 const base = require("./baseController");
-
-const UserProviderServices = require("../models/userProviderServices");
 
 const userProfile = require("../models/userProfiles");
 const UserProviderServices = require("../models/userProviderServices");
