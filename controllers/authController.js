@@ -29,8 +29,7 @@ const createToken = (id) => {
 exports.login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
-    console.log(req.body)
-
+const deviceToken = req.headers['device-token']
     // 1) check if email and password exist
     if (!email || !password) {
       return next(
@@ -61,7 +60,8 @@ exports.login = async (req, res, next) => {
     }
 
     const token = createToken(user.id);
-     user.token = token
+     user.token = token;
+     user.deviceToken = deviceToken;
 await user.save()
     user.password = undefined;
 
@@ -160,11 +160,351 @@ exports.sendOTP = async (req, res, next) => {
     }
     // gen otp
     const data = await otp();
+    const htmlContent = `
+    <html>
+    <body>
+      <div style="word-spacing: normal; font-family: 'IBM Plex Sans', sans-serif">
+        <div>
+          <div style="margin: 0px auto; max-width: 600px; background-color: #ffe6ea;">
+            <div class="m_515302627557219584mj-column-per-100" style="width: 50%">
+              <table cellpadding="0" cellspacing="0" width="100%">
+                <tbody>
+                  <tr>
+                    <td
+                      style="
+                        font-size: 0px;
+                        padding: 22px 6px 0px 14px;
+                        word-break: break-word;
+                      "
+                    >
+                      <a
+                        href="/"
+                        class="css-5k1n1y"
+                        style="
+                          text-decoration: none;
+                          display: flex;
+                          align-items: center;
+                        "
+                      >
+                        <img src="https://appserviceccc.azurewebsites.net/uploads/logomail.png" alt="logo" width="100%" />
+                      </a>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div style="padding: 16px 6px 20px 16px">
+              <h2 style="margin: 0">Learn more about your new account</h2>
+            </div>
+          </div>
+          <div style="margin: 0px auto; max-width: 600px; padding-bottom: 10px; background-color: #ffe6ea99;">
+            <table style="width: 100%">
+              <tbody>
+                <tr>
+                  <td
+                    style="
+                      direction: ltr;
+                      font-size: 0px;
+                      padding: 10px 32px 36px 16px;
+                      text-align: center;
+                    "
+                  >
+                    <div style="margin: 0px auto; max-width: 536px; margin-bottom: 12px;">
+                      <table cellpadding="0" cellspacing="0" style="width: 100%">
+                        <tbody>
+                          <tr>
+                            <td
+                              style="
+                                direction: ltr;
+                                font-size: 0px;
+                                padding: 0;
+                                text-align: center;
+                              "
+                            >
+                              <div
+                                class="m_515302627557219584mj-column-per-100"
+                                style="
+                                  font-size: 0;
+                                  line-height: 0;
+                                  text-align: left;
+                                  display: inline-block;
+                                  width: 100%;
+                                  direction: ltr;
+                                "
+                              >
+                                <div
+                                  class="m_515302627557219584mj-column-per-100"
+                                  style="
+                                    font-size: 0px;
+                                    text-align: left;
+                                    direction: ltr;
+                                    display: inline-block;
+                                      vertical-align: top;
+                                      width: 100%;
+                                    "
+                                  >
+                                    <table
+                                      cellpadding="0"
+                                      cellspacing="0"
+                                      width="100%"
+                                    >
+                                      <tbody>
+                                        <tr>
+                                          <td
+                                            style="
+                                              font-size: 0px;
+                                              padding: 0;
+                                              word-break: break-word;
+                                            "
+                                          >
+                                            <div
+                                              style="
+                                                font-size: 14px;
+                                                line-height: 20px;
+                                                text-align: left;
+                                                /* color: #3a2a2c; */
+                                              "
+                                            >
+                                              
+                                              <span
+                                                style="
+                                                  font-weight: 700;
+                                                  color: #9155fd;
+                                                "
+                                                ></span
+                                              >
+                                            </div>
+                                          </td>
+                                        </tr>
+                                        <tr>
+                                          <td
+                                            style="
+                                              font-size: 0px;
+                                              padding: 0;
+                                              word-break: break-word;
+                                            "
+                                          >
+                                            <div
+                                              style="
+                                                font-size: 14px;
+                                                line-height: 20px;
+                                                text-align: left;
+                                                /* color: #3a2a2c; */
+                                              "
+                                            >
+                                              We're excited to have you get started
+                                              at the Stream Master. First, you need
+                                              to confirm your account.
+                                            </div>
+                                          </td>
+                                        </tr>
+                                        <tr>
+                                          <td
+                                            style="
+                                              font-size: 0px;
+                                              padding: 0;
+                                              word-break: break-word;
+                                            "
+                                          >
+                                            <div
+                                              style="
+                                                font-size: 14px;
+                                                line-height: 20px;
+                                                text-align: left;
+                                                /* color: #3a2a2c; */
+                                              "
+                                            >
+                                              OTP:
+                                              <span style="color: #9155fd"
+                                                >${data.resetToken}</span
+                                              >
+                                            </div>
+                                          </td>
+                                        </tr>
+                                      </tbody>
+                                    </table>
+                                  </div>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+    
+                          <tbody>
+                            <tr>
+                              <td
+                                style="
+                                  direction: ltr;
+                                  padding: 12px 0;
+                                  text-align: center;
+                                "
+                              >
+                                <div
+                                  style="
+                                    font-size: 14px;
+                                    line-height: 20px;
+                                    /* color: #3a2a2c; */
+                                  "
+                                >
+                                  <!-- <button
+                                    type="submit"
+                                    style="
+                                      width: 99%;
+                                      background-color: #ff0808;
+                                      color: #fff;
+                                      padding: 12px;
+                                      font-size: 16px;
+                                      font-weight: bold;
+                                      outline: none;
+                                      border: none;
+                                      border-radius: 4px;
+                                    "
+                                  >
+                                    Đặt lại mật khẩu
+                                  </button> -->
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+    
+                          <tbody>
+                            <tr>
+                              <td style="vertical-align: top; padding: 0">
+                                <table cellpadding="0" cellspacing="0" width="100%">
+                                  <tbody>
+                                    <tr>
+                                      <td
+                                        style="
+                                          font-size: 0px;
+                                          padding: 0;
+                                          word-break: break-word;
+                                        "
+                                      >
+                                        <div
+                                          style="height: 12px; line-height: 12px"
+                                        >
+                                         
+                                        </div>
+                                      </td>
+                                    </tr>
+                                    <tr>
+                                      <td
+                                        style="
+                                          font-size: 0px;
+                                          padding: 0;
+                                          word-break: break-word;
+                                        "
+                                      >
+                                        <div
+                                          style="
+                                            font-size: 12px;
+                                            line-height: 18px;
+                                            text-align: left;
+                                            /* color: #3a2a2c; */
+                                          "
+                                        >
+                                          We're excited to have you get started at
+                                          the Stream Master. First, you need to
+                                          confirm your account. Just press the
+                                          button below.
+                                        </div>
+                                      </td>
+                                    </tr>
+                                  </tbody>
+                                </table>
+                              </td>
+                            </tr>
+                          </tbody>
+                          <tbody>
+                            <tr>
+                              <td
+                                style="
+                                  font-size: 0px;
+                                  padding: 0;
+                                  word-break: break-word;
+                                "
+                              >
+                                <div style="height: 12px; line-height: 12px">
+                                  â€Š
+                                </div>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td
+                                style="
+                                  font-size: 0px;
+                                  padding: 0;
+                                  word-break: break-word;
+                                "
+                                >
+                                <div
+                                  style="
+                                    font-size: 14px;
+                                    line-height: 18px;
+                                    text-align: left;
+                                    font-weight: bold;
+                                  "
+                                >
+                                StreamMaster Team
+                                </div>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td
+                                style="
+                                  font-size: 0px;
+                                  padding-top: 4px;
+                                  word-break: break-word;
+                                "
+                              >
+                                <div
+                                  style="
+                                    font-size: 14px;
+                                    line-height: 20px;
+                                    text-align: left;
+                                    /* color: #3a2a2c; */
+                                  "
+                                >
+                                  
+    We're sending this email because you've signed up for an account
+    StreamMaster account.
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                      <hr/>
+                      <div style="
+                      font-size: 14px;
+                      line-height: 20px;
+                      text-align: left;
+                      color: #00000085;
+                      padding: 10px 0;
+                    ">
+                        You have questions? Please visit...
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+              <!-- <div style="display: flex; justify-content: center">
+              <button style="padding: 10px 30px; background-color: #9155fd; border: none; margin: 0px 15px">
+                <a href="" style="text-decoration: none; color: white">
+                  <strong>Go to Ticket</strong>
+                </a>
+              </button>
+            </div> -->
+            
+            </div>
+          </div>
+        </div>
+    </body>
+  </html>`;
 
     sendEmail({
       email: email,
-      subject: "Yêu cầu đăng ký tài khoản",
-      message: `Ma xac nhan cua ban la: ${data.resetToken}`,
+      subject: "Requires account registration",
+      html: htmlContent,
     });
 
     return res.status(200).json({
@@ -220,7 +560,7 @@ exports.delete = async (req, res) => {
     const user = await req.user;
     const correctPassword = await bcrypt.compare(password, user.password);
     if (!correctPassword) {
-      return res.status(400), json({ message: "Password wrong" });
+      return res.status(400).json({ message: "Password wrong" });
     }
     await UserProfile.findOneAndDelete({ userId: user.id });
     await User.findByIdAndDelete(user.id);
@@ -290,6 +630,7 @@ const sendEmail = async (options) => {
     to: options.email,
     subject: options.subject,
     text: options.message,
+    html:options.html
   };
 
   await transporter.sendMail(mailOptions);
@@ -300,7 +641,7 @@ exports.forgotPassword = async (req, res, next) => {
     const { email } = req.body;
 
     // 1) Tìm user dựa trên email
-    const user = await UserProfile.findOne({ email: email });
+    const user = await User.findOne({ email: email });
     if (!user) {
       return next(
         new AppError(
@@ -312,12 +653,352 @@ exports.forgotPassword = async (req, res, next) => {
     }
 
     const data = await otp();
-    ResetTokenStore.set(resetToken, email);
-    console.log(resetToken);
+    // ResetTokenStore.set(resetToken, email);
+    // console.log(resetToken);
+    const htmlContent = `
+    <html>
+    <body>
+      <div style="word-spacing: normal; font-family: 'IBM Plex Sans', sans-serif">
+        <div>
+          <div style="margin: 0px auto; max-width: 600px; background-color: #ffe6ea;">
+            <div class="m_515302627557219584mj-column-per-100" style="width: 50%">
+              <table cellpadding="0" cellspacing="0" width="100%">
+                <tbody>
+                  <tr>
+                    <td
+                      style="
+                        font-size: 0px;
+                        padding: 22px 6px 0px 14px;
+                        word-break: break-word;
+                      "
+                    >
+                      <a
+                        href="/"
+                        class="css-5k1n1y"
+                        style="
+                          text-decoration: none;
+                          display: flex;
+                          align-items: center;
+                        "
+                      >
+                        <img src="https://appserviceccc.azurewebsites.net/uploads/logomail.png" alt="logo" width="100%" />
+                      </a>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div style="padding: 16px 6px 20px 16px">
+              <h2 style="margin: 0">Learn more about your new account</h2>
+            </div>
+          </div>
+          <div style="margin: 0px auto; max-width: 600px; padding-bottom: 10px; background-color: #ffe6ea99;">
+            <table style="width: 100%">
+              <tbody>
+                <tr>
+                  <td
+                    style="
+                      direction: ltr;
+                      font-size: 0px;
+                      padding: 10px 32px 36px 16px;
+                      text-align: center;
+                    "
+                  >
+                    <div style="margin: 0px auto; max-width: 536px; margin-bottom: 12px;">
+                      <table cellpadding="0" cellspacing="0" style="width: 100%">
+                        <tbody>
+                          <tr>
+                            <td
+                              style="
+                                direction: ltr;
+                                font-size: 0px;
+                                padding: 0;
+                                text-align: center;
+                              "
+                            >
+                              <div
+                                class="m_515302627557219584mj-column-per-100"
+                                style="
+                                  font-size: 0;
+                                  line-height: 0;
+                                  text-align: left;
+                                  display: inline-block;
+                                  width: 100%;
+                                  direction: ltr;
+                                "
+                              >
+                                <div
+                                  class="m_515302627557219584mj-column-per-100"
+                                  style="
+                                    font-size: 0px;
+                                    text-align: left;
+                                    direction: ltr;
+                                    display: inline-block;
+                                      vertical-align: top;
+                                      width: 100%;
+                                    "
+                                  >
+                                    <table
+                                      cellpadding="0"
+                                      cellspacing="0"
+                                      width="100%"
+                                    >
+                                      <tbody>
+                                        <tr>
+                                          <td
+                                            style="
+                                              font-size: 0px;
+                                              padding: 0;
+                                              word-break: break-word;
+                                            "
+                                          >
+                                            <div
+                                              style="
+                                                font-size: 14px;
+                                                line-height: 20px;
+                                                text-align: left;
+                                                /* color: #3a2a2c; */
+                                              "
+                                            >
+                                              
+                                              <span
+                                                style="
+                                                  font-weight: 700;
+                                                  color: #9155fd;
+                                                "
+                                                ></span
+                                              >
+                                            </div>
+                                          </td>
+                                        </tr>
+                                        <tr>
+                                          <td
+                                            style="
+                                              font-size: 0px;
+                                              padding: 0;
+                                              word-break: break-word;
+                                            "
+                                          >
+                                            <div
+                                              style="
+                                                font-size: 14px;
+                                                line-height: 20px;
+                                                text-align: left;
+                                                /* color: #3a2a2c; */
+                                              "
+                                            >
+                                              We're excited to have you get started
+                                              at the Stream Master. First, you need
+                                              to confirm your account.
+                                            </div>
+                                          </td>
+                                        </tr>
+                                        <tr>
+                                          <td
+                                            style="
+                                              font-size: 0px;
+                                              padding: 0;
+                                              word-break: break-word;
+                                            "
+                                          >
+                                            <div
+                                              style="
+                                                font-size: 14px;
+                                                line-height: 20px;
+                                                text-align: left;
+                                                /* color: #3a2a2c; */
+                                              "
+                                            >
+                                              OTP:
+                                              <span style="color: #9155fd"
+                                                >${data.resetToken}</span
+                                              >
+                                            </div>
+                                          </td>
+                                        </tr>
+                                      </tbody>
+                                    </table>
+                                  </div>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+    
+                          <tbody>
+                            <tr>
+                              <td
+                                style="
+                                  direction: ltr;
+                                  padding: 12px 0;
+                                  text-align: center;
+                                "
+                              >
+                                <div
+                                  style="
+                                    font-size: 14px;
+                                    line-height: 20px;
+                                    /* color: #3a2a2c; */
+                                  "
+                                >
+                                  <!-- <button
+                                    type="submit"
+                                    style="
+                                      width: 99%;
+                                      background-color: #ff0808;
+                                      color: #fff;
+                                      padding: 12px;
+                                      font-size: 16px;
+                                      font-weight: bold;
+                                      outline: none;
+                                      border: none;
+                                      border-radius: 4px;
+                                    "
+                                  >
+                                    Đặt lại mật khẩu
+                                  </button> -->
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+    
+                          <tbody>
+                            <tr>
+                              <td style="vertical-align: top; padding: 0">
+                                <table cellpadding="0" cellspacing="0" width="100%">
+                                  <tbody>
+                                    <tr>
+                                      <td
+                                        style="
+                                          font-size: 0px;
+                                          padding: 0;
+                                          word-break: break-word;
+                                        "
+                                      >
+                                        <div
+                                          style="height: 12px; line-height: 12px"
+                                        >
+                                         
+                                        </div>
+                                      </td>
+                                    </tr>
+                                    <tr>
+                                      <td
+                                        style="
+                                          font-size: 0px;
+                                          padding: 0;
+                                          word-break: break-word;
+                                        "
+                                      >
+                                        <div
+                                          style="
+                                            font-size: 12px;
+                                            line-height: 18px;
+                                            text-align: left;
+                                            /* color: #3a2a2c; */
+                                          "
+                                        >
+                                          We're excited to have you get started at
+                                          the Stream Master. First, you need to
+                                          confirm your account. Just press the
+                                          button below.
+                                        </div>
+                                      </td>
+                                    </tr>
+                                  </tbody>
+                                </table>
+                              </td>
+                            </tr>
+                          </tbody>
+                          <tbody>
+                            <tr>
+                              <td
+                                style="
+                                  font-size: 0px;
+                                  padding: 0;
+                                  word-break: break-word;
+                                "
+                              >
+                                <div style="height: 12px; line-height: 12px">
+                                  â€Š
+                                </div>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td
+                                style="
+                                  font-size: 0px;
+                                  padding: 0;
+                                  word-break: break-word;
+                                "
+                                >
+                                <div
+                                  style="
+                                    font-size: 14px;
+                                    line-height: 18px;
+                                    text-align: left;
+                                    font-weight: bold;
+                                  "
+                                >
+                                StreamMaster Team
+                                </div>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td
+                                style="
+                                  font-size: 0px;
+                                  padding-top: 4px;
+                                  word-break: break-word;
+                                "
+                              >
+                                <div
+                                  style="
+                                    font-size: 14px;
+                                    line-height: 20px;
+                                    text-align: left;
+                                    /* color: #3a2a2c; */
+                                  "
+                                >
+                                  
+    We're sending this email because you've signed up for an account
+    StreamMaster account.
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                      <hr/>
+                      <div style="
+                      font-size: 14px;
+                      line-height: 20px;
+                      text-align: left;
+                      color: #00000085;
+                      padding: 10px 0;
+                    ">
+                        You have questions? Please visit...
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+              <!-- <div style="display: flex; justify-content: center">
+              <button style="padding: 10px 30px; background-color: #9155fd; border: none; margin: 0px 15px">
+                <a href="" style="text-decoration: none; color: white">
+                  <strong>Go to Ticket</strong>
+                </a>
+              </button>
+            </div> -->
+            
+            </div>
+          </div>
+        </div>
+    </body>
+  </html>`;
     await sendEmail({
       email: user.email,
       subject: "Yêu cầu đặt lại mật khẩu",
-      message: `Ma xac nhan cua ban la: ${data.resetToken}`,
+      html: htmlContent,
     });
 
     res.status(200).json({

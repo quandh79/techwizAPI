@@ -2,7 +2,6 @@ const UserProfile = require('../models/userProfiles');
 const User = require('../models/users');
 const base = require('./baseController');
 
-const userProfile = require("../models/userProfiles"); 
 const UserProviderServices = require("../models/userProviderServices"); 
 
 
@@ -26,7 +25,7 @@ exports.deleteMe = async (req, res, next) => {
 exports.getAllUsers = async (req,res,next)=>{
   try {
     
-    const data = await userProfile.find().populate(
+    const data = await User.find().populate(
       "userId"
     )
  
@@ -42,22 +41,25 @@ exports.getAllUsers = async (req,res,next)=>{
 }
 
 };
+
 exports.getOneUser = async (req, res) => {
   try {
-      const {id} = req.query;
-   console.log(id);
+    const { id } = req.query;
+    console.log(id);
 
-    const user = await UserProfile.findOne({userId:id});
+    const user = await UserProfile.findOne({ userId: id });
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    const services = await UserProviderServices.findOne({userId:id });
+    const services = await UserProviderServices.find({ userId: id });
 
     return res.status(200).json({
-      userProfile: user,
-      services: services,
+      data: {
+        userProfile: user,
+        services: services.length>0?services:[],
+      },
     });
   } catch (error) {
     return res.status(500).json(error.message);

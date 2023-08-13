@@ -5,5 +5,5 @@ const { protect } = require("../controllers/authController");
 
 router.post("/subcribe", protect, regService.registerProviderService);
 router.post("/isactive", regService.isActive);
-
+router.get("/get", regService.get)
 module.exports = router;

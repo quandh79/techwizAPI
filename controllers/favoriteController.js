@@ -1,18 +1,50 @@
 const Favorites = require("../models/favorite");
-exports.get = async (req, res) => {
+const product = require('../models/product');
+const users = require("../models/users");
+
+exports.getFavorites = async (req, res) => {
   try {
-    const user = req.user;
-    const data = await Favorites.findOne({ userId: user.id });
-    if (!data) {
-      return res.status(404).json({ message: "Not Found" });
+    let token;
+    if (
+      req.headers.authorization &&
+      req.headers.authorization.startsWith("Bearer")
+    ) {
+      token = req.headers.authorization.split(" ")[1];
     }
+    if (!token) {
+      return res.status(401).json({
+        message: "You are not logged in! Please login in to continue",
+        req,
+        res,
+      });
+    }
+    console.log(token)
+    const page = req.query.page * 1 || 1;
+    const limit = req.query.limit * 1 || 5;
+    const skip = (page - 1) * limit;
+const user = await users.findOne({token})
+console.log(user)
+    const totalFavorites = await Favorites.countDocuments({ userId: user._id });
+    const totalPages = Math.ceil(totalFavorites / limit);
+
+    const favorites = await Favorites.find({ userId: user._id }).populate("productId")
+      // .skip(skip)
+      // .limit(limit);
+
+    if (!favorites) {
+      return res.status(404).json({ message: 'Favorites not found for this user.' });
+    }
+console.log(favorites)
     return res.status(200).json({
-      data,
+      // totalPages,
+      favorites:favorites,
     });
   } catch (err) {
     res.status(500).json(err.message);
   }
 };
+
+
 
 exports.create = async (req, res) => {
   const user = req.user;

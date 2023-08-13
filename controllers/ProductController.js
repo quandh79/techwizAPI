@@ -1,7 +1,7 @@
 const Product = require("../models/product");
 const Provider = require("../models/streamingProviders");
 const { login } = require("./authController");
-
+const favorite = require("../models/favorite")
 exports.createProduct = async (req, res) => {
   try {
     const { name, category, description, providers, thumbnail,actor } = req.body;
@@ -60,10 +60,27 @@ exports.getProductProviders = async (req, res) => {
   try {
     const { productId } = req.body;
     const product = await Product.findById(productId);
-    const populateProduct = await Product.find({category:product.category})
+    console.log(product._id)
+    const populateProduct = await Product.find({ category: product.category });
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
     }
+    const fav = await favorite.find({
+      productId: productId
+    });
+    console.log(productId)
+    console.log(fav)
+    console.log(product)
+    if (!fav || fav.length === 0) {
+      product.isSave = false;
+      await product.save();
+      console.log(product)
+
+    }else{
+      product.isSave = true;
+    await product.save();
+    }
+    
     const providers = product.providers;
     let pro = [];
     await Promise.all(
@@ -83,20 +100,19 @@ exports.getProductProviders = async (req, res) => {
       })
     );
 
-      return res.status(200).json({
-        data: {
-          product,
-          provider:pro,
-          populateProduct
-        },
-      });
-   
+    return res.status(200).json({
+      data: {
+        product,
+        provider: pro,
+        populateProduct,
+      },
+    });
   } catch (error) {
     return res.status(500).json(error.message);
   }
 };
 
-exports.getProductPr = async (req, res) => {
+exports.getProduct = async (req, res) => {
   try {
     //const { productId } = req.body;
     const product = await Product.find();

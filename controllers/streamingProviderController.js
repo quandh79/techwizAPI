@@ -1,3 +1,4 @@
+const feedback = require("../models/feedback");
 const streamingProviders = require("../models/streamingProviders");
 
 
@@ -11,26 +12,33 @@ const {name} = req.query
     const totalProviders = await streamingProviders.countDocuments();
     const totalPages = Math.ceil(totalProviders / limit);
 if(name){
-  const providers  = await streamingProviders.findOne({name}).skip(skip).limit(limit);
-    const data = providers.map((provider) => {
-      const minPrice = provider.packages.reduce(
+  const providers  = await streamingProviders.findOne({name})
+  if(!providers){return res.status(404).json({message:"Not Found"})}
+    
+      const minPrice = providers.packages.reduce(
         (min, package) => (package.price < min ? package.price : min),
         Infinity
       );
-      const maxPrice = provider.packages.reduce(
+      const maxPrice = providers.packages.reduce(
         (max, package) => (package.price > max ? package.price : max),
         -Infinity
       );
+      const fb =await feedback.find({providerId:providers.id})
+      const filteredFeedbacks = fb.filter(
+        (feedback) => feedback.content === "2" || feedback.content === "3"
+      )
       const priceRange = `from $${minPrice} to $${maxPrice}`;
-      return {
-        ...provider.toObject(),
+      const data = {
+        ...providers.toObject(),
         priceRange,
-      };
-    });
+        fb:filteredFeedbacks.length>0?filteredFeedbacks:[]
+      
+    };
     return res.status(200).json({data,totalPages});
 }
     const providers  = await streamingProviders.find().skip(skip).limit(limit);
-    const data = providers.map((provider) => {
+    const data = []
+    for(const provider of providers) {
       const minPrice = provider.packages.reduce(
         (min, package) => (package.price < min ? package.price : min),
         Infinity
@@ -40,28 +48,18 @@ if(name){
         -Infinity
       );
       const priceRange = `from $${minPrice} to $${maxPrice}`;
-      return {
+      const fb = await feedback.find({providerId:provider.id})
+      const filteredFeedbacks = fb.filter(
+        (feedback) => feedback.content === "2" || feedback.content === "3"
+      );
+      data.push( {
         ...provider.toObject(),
         priceRange,
-      };
-    });
-    return res.status(200).json({data,totalPages});
-  } catch (error) {
-    return res.status(500).json({ message: "Error" });
-  }
-};
+        fb:filteredFeedbacks.length>0?filteredFeedbacks:[]
+      });
+    };
 
-exports.getStreamingProviderByName = async (req, res) => {
-  try {
-    const { name } = req.params;
-    console.log(name);
-    const data = await streamingProviders.findOne({ name });
-    if (!data) {
-      return res.status(404).json({ message: "Provider is not exists" });
-    }
-    return res.status(200).json({
-      data: data,
-    });
+    return res.status(200).json({data,totalPages});
   } catch (error) {
     return res.status(500).json(error.message);
   }

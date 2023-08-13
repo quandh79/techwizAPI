@@ -8,6 +8,7 @@ const ProductShema = new mongoose.Schema({
   thumbnail: {
     type: String,
   },
+  isSave:{type:Boolean}
 });
 
 module.exports = mongoose.model("Product", ProductShema);
