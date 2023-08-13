@@ -29,6 +29,7 @@ const createToken = (id) => {
 exports.login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
+    console.log(req.body)
 
     // 1) check if email and password exist
     if (!email || !password) {
@@ -60,13 +61,34 @@ exports.login = async (req, res, next) => {
     }
 
     const token = createToken(user.id);
-
+     user.token = token
+await user.save()
     user.password = undefined;
 
     res.status(200).json({
       status: "success",
       token,
     });
+  } catch (err) {
+    res.status(500).json(err.message);
+  }
+};
+
+exports.changePassword = async (req, res) => {
+  try {
+    const user = req.user;
+    const { oldPassword, newPassword, confirmPassword } = req.body;
+    const correctPassword = await bcrypt.compare(oldPassword, user.password);
+    if (!correctPassword) {
+      return res.status(400).json({ message: "Old password wrong" });
+    }
+    if (newPassword !== confirmPassword) {
+      return res.status(400).json({ message: "Confirm wrong" });
+    }
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    user.password = hashedPassword;
+    user.save();
+    return res.status(201).json({ message: "Success" });
   } catch (err) {
     res.status(500).json(err.message);
   }

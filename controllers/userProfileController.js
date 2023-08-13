@@ -1,4 +1,4 @@
-const u = require("../models/userProfiles"); 
+const User = require("../models/userProfiles"); 
 const UserProviderServices = require("../models/userProviderServices"); 
 
 exports.getUserAndServices = async (req, res) => {
@@ -6,7 +6,7 @@ exports.getUserAndServices = async (req, res) => {
         const userData = req.user;
       console.log(userId);
   
-      const user = await u.findOne({userId:userData.userId});
+      const user = await User.findOne({userId:userData.userId});
   
       if (!user) {
         return res.status(404).json({ message: "User not found" });
@@ -27,7 +27,7 @@ exports.getUserAndServices = async (req, res) => {
         const {id} = req.params;
      console.log(id);
   
-      const user = await u.findOne({userId:id});
+      const user = await User.findOne({userId:id});
   
       if (!user) {
         return res.status(404).json({ message: "User not found" });

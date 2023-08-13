@@ -1,11 +1,11 @@
 const express = require('express');
 const router = express.Router();
 //const router = require('express-promise-router')()
-const authController = require('./../controllers/authController');
-const usermanage = require("../controllers/ManageUserController");
+
+const usermanage = require("../controllers/manageUserController");
 const authAdminController = require('../controllers/authAdminController');
 const managePv = require('../controllers/manageStreamProvider')
-const manageU = require('../controllers/userProfileController')
+
 
 const multer = require("multer");
 // chon thu muc muon luu anh
@@ -41,12 +41,12 @@ router
     .get(usermanage.getAllUsers);
 
 
-router.get('/getUser/:id',usermanage.getUser);
+router.get('/getUser/',usermanage.getOneUser);
 
 
     // manage streamProder
 
-router.get('/stream-provider/getall', managePv.getAllStreamProvider);
+router.get('provider/getall', managePv.getAllStreamProvider);
 router.get('/stream-provider/getone/:id',managePv.getOne);
 router.post('/stream-provider/create',managePv.Create);
 router.patch('/stream-provider/update/:id',managePv.Update);

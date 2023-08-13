@@ -1,29 +1,53 @@
 const streamingProviders = require("../models/streamingProviders");
 
-// exports.getStreamingProviders = async (req, res) => {
-//   try {
-//     const data = await streamingProviders.find();
-//     console.log(data);
-//     return res.status(200).json(data);
-//   } catch (error) {
-//     return res.status(500).json({ message: "Error" });
-//   }
-// };
+
 
 exports.getStreamingProviders = async (req, res) => {
   try {
     const page = req.query.page * 1 || 1;
     const limit = req.query.limit * 1 || 10;
     const skip = (page - 1) * limit;
-
+const {name} = req.query
     const totalProviders = await streamingProviders.countDocuments();
     const totalPages = Math.ceil(totalProviders / limit);
-
-    const data = await streamingProviders.find().skip(skip).limit(limit);
-    
-    return res.status(200).json({ data, totalPages });
+if(name){
+  const providers  = await streamingProviders.findOne({name}).skip(skip).limit(limit);
+    const data = providers.map((provider) => {
+      const minPrice = provider.packages.reduce(
+        (min, package) => (package.price < min ? package.price : min),
+        Infinity
+      );
+      const maxPrice = provider.packages.reduce(
+        (max, package) => (package.price > max ? package.price : max),
+        -Infinity
+      );
+      const priceRange = `from $${minPrice} to $${maxPrice}`;
+      return {
+        ...provider.toObject(),
+        priceRange,
+      };
+    });
+    return res.status(200).json({data,totalPages});
+}
+    const providers  = await streamingProviders.find().skip(skip).limit(limit);
+    const data = providers.map((provider) => {
+      const minPrice = provider.packages.reduce(
+        (min, package) => (package.price < min ? package.price : min),
+        Infinity
+      );
+      const maxPrice = provider.packages.reduce(
+        (max, package) => (package.price > max ? package.price : max),
+        -Infinity
+      );
+      const priceRange = `from $${minPrice} to $${maxPrice}`;
+      return {
+        ...provider.toObject(),
+        priceRange,
+      };
+    });
+    return res.status(200).json({data,totalPages});
   } catch (error) {
-    return res.status(500).json(error.message);
+    return res.status(500).json({ message: "Error" });
   }
 };
 

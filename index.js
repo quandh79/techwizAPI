@@ -12,7 +12,9 @@ const bodyParser = require("body-parser");
 const logger = require("morgan");
 const providerRoute = require("./routes/streamingProvider.routes");
 const regserviceRoute = require("./routes/regservice.routes");
-const channelRoute = require("./routes/channel.routes");
+const manageProviderRoute = require('./routes/manageProvider.route');
+const manageFeedBackRoute = require('./routes/manageFeedBack.route');
+const manageProductRoute = require('./routes/manageProduct.route')
 const ejs = require('ejs');
 
 
@@ -40,22 +42,23 @@ const formData = require("express-form-data");
 app.use(formData.parse());
 app.use(helmet());
 app.use(logger("dev"));
-app.use(bodyParser.json());
 app.use(express.static("public"));
 app.use(express.json());
 app.use(express.urlencoded({extended:true}));
 app.use(globalErrHandler);
-const upload = multer({dest:"public/uploads/"})
+app.use(helmet.crossOriginResourcePolicy({ policy: "cross-origin" }));
 // const userRoute = require('./routes/userRoutes')
 const authRoute = require("./routes/auth.routes");
 // app.use('/api', userRoute)
 app.use("/api", authRoute);
 const manageRoute = require("./routes/Manage.Routes");
 // app.use('/api', userRoute)
-app.use("/api/manage/", manageRoute);
+app.use('/api/manage-product',manageProductRoute)
+app.use('/api/manage-provider',manageProviderRoute)
+app.use('/api/manage-feedback',manageFeedBackRoute)
+app.use("/api/manage", manageRoute);
 app.use("/api/provider", providerRoute);
 app.use("/api/regsevice", regserviceRoute);
-app.use("/api/channel", channelRoute);
 const pay = require('./controllers/paymentController')
 app.use('/',pay);
 app.use("/api/product", ProductRoute);
@@ -69,12 +72,7 @@ process.on("uncaughtException", (err) => {
   console.log(err.name, err.message);
   process.exit(1);
 });
-app.post('public/uploads/streamprovider', upload.single("thumbnail"),(req,res)=>{
-  const file = req
-  console.log(file)
-  fs.renameSync(file.path,'public/uploads/streamprovider'+ file.originalname)
-  res.status(200).json({message:"Success"})
-})
+
 const database ="mongodb+srv://ungsymui:Usm03091991@cluster0.c0navp3.mongodb.net/?retryWrites=true&w=majority";
 //mongodb://127.0.0.1:27017/api_nodejs_l
 

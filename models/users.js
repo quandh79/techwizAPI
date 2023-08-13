@@ -16,7 +16,7 @@ const userSchema = new mongoose.Schema({
         maxLength:255,
         
     },
-   token:String,
+   token:{type:String},
       isActive: {
         type: Boolean,
         default: true

@@ -1,7 +1,8 @@
 const express = require('express');
 const ejs = require('ejs');
 const paypal = require('paypal-rest-sdk');
-const userProfiles = require('../models/userProfiles');
+const userProfiles = require('../models/users');
+const userDatas = require('../models/userProfiles');
 const streamingProviders = require('../models/streamingProviders');
 const { protect } = require('./authAdminController');
 const { isActive } = require('./RegServiceController');
@@ -16,12 +17,11 @@ paypal.configure({
 })
 
 router.get('/paypal', async (req, res) => { 
-    const{providerId,code,userId} = req.query;//?id=bbbb&
-    // const user = t
-
-
-    
-    const userData = await userProfiles.findOne({userId:userId});
+    const{token,providerId,code} = req.query;//?id=bbbb&
+   
+    const userDat = await userProfiles.findOne({token:token});
+    const userData = await userDatas.findOne({userId:userDat.id})
+    console.log("ccccc",userData)
     const providerData= await streamingProviders.findById(providerId);
     const packageData = await providerData.packages.filter(
         (pkg) => pkg.code === "ba"

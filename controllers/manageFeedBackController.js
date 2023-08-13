@@ -1,5 +1,8 @@
 const feedback = require("../models/feedback");
 const userProviderServices = require("../models/userProviderServices");
+const { promises } = require("nodemailer/lib/xoauth2");
+const userProfiles = require("../models/userProfiles");
+const streamingProviders = require("../models/streamingProviders");
 
 exports.createFeedback = async (req, res) => {
   try {
@@ -39,12 +42,21 @@ exports.getActive = async (req, res) => {
 
 exports.get = async (req, res) => {
   try {
-    const listFeedback = await feedback.find();
-    if (listFeedback.length < 1) {
-      return res.status(404).json({ message: "Not Found" });
-    }
-    
-    return res.status(200).json({ data: listFeedback });
+    const f =await feedback.find()
+    if(!f) {return res.status(404).json({message:"Not Found"})}
+    let data =[]
+    await Promise.all(
+      f.map(async (item) => {
+        const user = await userProfiles.findOne({ userId: { $in: item.userID } });
+        const pro = await streamingProviders.findOne({ _id: { $in: item.providerID } });
+        const user_provider = { user: user.name, provider: pro.name };
+        const itemObject = item.toObject(); 
+        itemObject.user_provider = await user_provider; 
+        data = data.concat(itemObject)
+        return itemObject;
+      }),
+)
+res.status(200).json(data)
   } catch (err) {
     res.status(500).json(err.message);
   }
@@ -52,8 +64,8 @@ exports.get = async (req, res) => {
 
 exports.Active = async (req, res) => {
   try {
-    const { id } = req.body;
-    const fb = await feedback.findById(id);
+    const { id } = req.params;
+    const fb = await feedback.findOne({userID:id});
     if (!fb) {
       return res.status(400).json({ message: "No response found or deleted" });
     }
@@ -67,18 +79,21 @@ exports.Active = async (req, res) => {
 
 exports.delete = async (req, res) => {
   try {
-    const user = req.user;
-    const { id } = req.body;
-    const fb = await feedback.findById(id);
-    if (!fb) {
-      return res.status(404).json({ message: "Not Found" });
-    }
-    if (fb.userID !== user.id) {
-      return res.status(400).json({
-        message: "You do not have permission to edit or delete this reply",
-      });
-    }
-    await feedback.deleteOne({ _id: id });
+    //const user = req.params;
+    const { id } = req.params;
+    console.log(id)
+    // const fb = await feedback.findById(id);
+    // if (!fb) {
+    //   return res.status(404).json({ message: "Not Found" });
+   // }
+    // if (fb.userID !== user.id) {
+    //   return res.status(400).json({
+    //     message: "You do not have permission to edit or delete this reply",
+    //   });
+    // }
+   const c =  await feedback.findByIdAndDelete(id);
+  
+    console.log(c)
     res.status(200).json({ message: "Feedback deleted successfully" });
   } catch (err) {
     res.status(500).json(err.message);

@@ -1,27 +1,38 @@
 const base = require('./baseController');
-const Sp = require('../models/streamingProviders');
+const StreamingProvider = require('../models/streamingProviders');
 
-exports.getAllStreamProvider = base.getAll(Sp);
+exports.getAllStreamProvider = async (req,res,next)=>{
+    try {
+        const providersWithPackages = await StreamingProvider.find({});
+        res.status(200).json(providersWithPackages);
+      } catch (error) {
+        res.status(500).json({ message: "Internal server error" });
+      }
+    };
+
+
+
+
 
 exports.Create = async (req, res, next) => {
     try {
         const { name } = req.body;
         console.log(req.body);
-        const n = await Sp.findOne({name: name});
-        if(!Sp){
+        const provider = await StreamingProvider.findOne({name: name});
+        if(provider){
             return res.status(422).json({
                 message: "Nha cung cap da ton tai"
             });
         }
-        const file = req.files;
-        const sp = await Sp.create({
+       
+        const data = await StreamingProvider.create({
           name: name,
           description: req.body.description,
-          thumbnail:"/uploads/streamprovider/"+file.thumbnail.name,
+          thumbnail:req.body.thumbnail?req.body.thumbnail:undefined,
           packages: req.body.packages ?req.body.packages:[]
         });
        return res.status(201).json({
-            sp,
+            data,
             status: "success",
             message: "Tao nha cung cap thanh cong",
           });
@@ -37,7 +48,7 @@ exports.uploadFile = async (req,res, next) => {
         const file = req.file;
         console.log(file)
 
-        const c = await Sp.findById(id);
+        const c = await StreamingProvider.findById(id);
         console.log(c)
         if(!c){
             return res.status(422).json({
@@ -58,19 +69,19 @@ exports.uploadFile = async (req,res, next) => {
 }
        
 
-exports.getOne = base.getOne(Sp);
+exports.getOne = base.getOne(StreamingProvider);
 exports.Update = async (req, res, next) => {
     try {
         const { name } = req.body;
         console.log(req.body)
-        const n = Sp.findOne({name: name});
+        const n = StreamingProvider.findOne({name: name});
         if(sp){
             req.status(422).json({
                 message: "Nha cung cap da ton tai"
             });
         }
         
-        const sp = await Sp.create({
+        const sp = await StreamingProvider.create({
           name: name,
           description: req.body.description,
           thumbnail: req.file ? req.file.path : null,
@@ -89,7 +100,7 @@ exports.Update = async (req, res, next) => {
 
 exports.deleteMe = async (req, res, next) => {
         try {
-            await Sp.findByIdAndUpdate(req.params.id, {
+            await StreamingProvider.findByIdAndUpdate(req.params.id, {
                 active: false
             });
     

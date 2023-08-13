@@ -1,3 +1,4 @@
+const UserProfile = require('../models/userProfiles');
 const User = require('../models/users');
 const base = require('./baseController');
 
@@ -41,25 +42,26 @@ exports.getAllUsers = async (req,res,next)=>{
 }
 
 };
-exports.getUser = async (req,res,next)=>{
+exports.getOneUser = async (req, res) => {
   try {
-    const { id } = req.params;
-    console.log(id)
-    
-    const data = await UserProviderServices.findOne({userId:id});
-    const dataUser = await userProfile.findOne({userId:id});
-      console.log(data)
+      const {id} = req.query;
+   console.log(id);
+
+    const user = await UserProfile.findOne({userId:id});
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const services = await UserProviderServices.findOne({userId:id });
+
     return res.status(200).json({
-        message:"Success",
-        data,
-        dataUser
-
+      userProfile: user,
+      services: services,
     });
-
-} catch (error) {
-   error.message;
-}
-
+  } catch (error) {
+    return res.status(500).json(error.message);
+  }
 };
 
 // Don't update password on this 

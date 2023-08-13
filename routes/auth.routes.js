@@ -13,6 +13,8 @@ router.post('/signup', authController.signup);
 router.get('/profile',protect, authController.getProfile);
 router.post('/update',protect, authController.updateProfile);
 router.post('/delete',protect, authController.delete);
+router.post("/changerpassword", protect, authController.changePassword);
+
 
 //Route Admin
 
