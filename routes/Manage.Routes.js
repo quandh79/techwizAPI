@@ -41,7 +41,7 @@ router
     .get(usermanage.getAllUsers);
 
 
-router.get('/getUser/',usermanage.getOneUser);
+router.get('/getUser',usermanage.getOneUser);
 
 
     // manage streamProder

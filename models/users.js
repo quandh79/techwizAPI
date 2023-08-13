@@ -22,7 +22,7 @@ const userSchema = new mongoose.Schema({
         default: true
       },
       
-
+      deviceToken:{type:String}
 });
 
 

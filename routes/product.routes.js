@@ -6,7 +6,6 @@ const { protect } = require("../controllers/authController");
 
 
 router.post("/create", Product.createProduct);
-router.get("/get", Product.getProduct);
 router.post("/getProductProvider", Product.getProductProviders);
 
 

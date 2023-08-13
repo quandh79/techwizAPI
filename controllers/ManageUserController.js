@@ -2,13 +2,18 @@ const UserProfile = require("../models/userProfiles");
 const User = require("../models/users");
 const base = require("./baseController");
 
+const UserProviderServices = require("../models/userProviderServices");
+
 const userProfile = require("../models/userProfiles");
 const UserProviderServices = require("../models/userProviderServices");
 
 exports.deleteMe = async (req, res, next) => {
   try {
-    await User.findByIdAndUpdate(req.user.id, {
-      active: false,
+    const data = await User.find().populate("userId");
+
+    res.status(200).json({
+      message: "Success",
+      data,
     });
 
     res.status(204).json({
@@ -32,6 +37,7 @@ exports.getAllUsers = async (req, res, next) => {
     next(error);
   }
 };
+
 exports.getOneUser = async (req, res) => {
   try {
     const { id } = req.query;
@@ -48,7 +54,7 @@ exports.getOneUser = async (req, res) => {
     return res.status(200).json({
       data: {
         userProfile: user,
-        services: services,
+        services: services.length > 0 ? services : [],
       },
     });
   } catch (error) {

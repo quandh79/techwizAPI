@@ -63,3 +63,14 @@ exports.isActive = async (id) => {
     return res.status(500).json(err.message);
   }
 };
+exports.get = async(req,res) => {
+  try{
+const user = req.user
+const list = await userProviderServices.find({userId:user.id})
+return res.status(200).json({
+  data:list.length>0?list:[]
+})
+  }catch(err){
+    res.status(500).json(err.message)
+  }
+}

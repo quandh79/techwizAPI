@@ -21,7 +21,6 @@ var storage = multer.diskStorage({
 var upload = multer({ storage: storage }).single("file");
 
 router.get("/get", streamingProvider.getStreamingProviders);
-router.get("/get-by-name", streamingProvider.getStreamingProviderByName);
 router.get("/get-service", streamingProvider.getService);
 router.get("/:providerId", streamingProvider.getStreamingProviderById);
 router.post("/getById", streamingProvider.getStreamingProviderById);

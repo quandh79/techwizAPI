@@ -5,6 +5,6 @@ const favorites = require("../controllers/favoriteController");
 const { protect } = require("../controllers/authController");
 
 router.post("/create", protect, favorites.create);
-router.get("/get", protect, favorites.get);
+router.get("/getFavorite",  favorites.getFavorites);
 
 module.exports = router;
