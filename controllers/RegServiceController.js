@@ -50,8 +50,7 @@ exports.isActive = async (id) => {
     const renewalDate = new Date(
       currentDate.getTime() + 30 * 24 * 60 * 60 * 1000
     );
-    const us = await userProviderServices.findById(id)
-;
+    const us = await userProviderServices.findById(id);
     if (!us) {
       return res.status(404).json({ message: "Not Found" });
     }
@@ -63,14 +62,16 @@ exports.isActive = async (id) => {
     return res.status(500).json(err.message);
   }
 };
-exports.get = async(req,res) => {
-  try{
-const user = req.user
-const list = await userProviderServices.find({userId:user.id})
-return res.status(200).json({
-  data:list.length>0?list:[]
-})
-  }catch(err){
-    res.status(500).json(err.message)
+exports.get = async (req, res) => {
+  try {
+    const user = req.user;
+    const list = await userProviderServices
+      .findOne({ userId: user.id })
+      .populate("streamingProviderId");
+    return res.status(200).json({
+      data: list.length > 0 ? list : [],
+    });
+  } catch (err) {
+    res.status(500).json(err.message);
   }
-}
+};
