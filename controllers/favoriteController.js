@@ -27,9 +27,9 @@ exports.getFavorites = async (req, res) => {
     const totalFavorites = await Favorites.countDocuments({ userId: user._id });
     const totalPages = Math.ceil(totalFavorites / limit);
 
-    const favorites = await Favorites.find({ userId: user._id }).populate(
-      "productId"
-    );
+    const favorites = await Favorites.findOne({ userId: user._id })
+      .populate("productId")
+      .select("-_id -userId -__v");
     // .skip(skip)
     // .limit(limit);
 
@@ -38,7 +38,6 @@ exports.getFavorites = async (req, res) => {
         .status(404)
         .json({ message: "Favorites not found for this user." });
     }
-    console.log(favorites);
     return res.status(200).json(favorites);
   } catch (err) {
     res.status(500).json(err.message);
