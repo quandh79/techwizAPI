@@ -66,19 +66,22 @@ exports.getProductProviders = async (req, res) => {
     const fav = await favorite.findOne({
       userId: user.id,
     });
-    for (const p of fav.productId) {
-      console.log(p.toString() === productId);
-      if (p.toString() === productId) {
-        product.isSave = true;
+    if (fav) {
+      for (const p of fav.productId) {
+        console.log(p.toString() === productId);
+        if (p.toString() === productId) {
+          product.isSave = true;
+          await product.save();
+          isProductSaved = true;
+          break;
+        }
+      }
+      if (!isProductSaved) {
+        product.isSave = false;
         await product.save();
-        isProductSaved = true;
-        break;
       }
     }
-    if (!isProductSaved) {
-      product.isSave = false;
-      await product.save();
-    }
+
     const providers = product.providers;
     let pro = [];
     await Promise.all(
