@@ -10,8 +10,10 @@ exports.getStreamingProviders = async (req, res) => {
     const totalProviders = await streamingProviders.countDocuments();
     const totalPages = Math.ceil(totalProviders / limit);
     if (name) {
-      const providers = await streamingProviders.find({ name });
-      if (!providers) {
+      const providers = await streamingProviders.find({
+        name: { $regex: "keyword", $options: "i" },
+      });
+      if (providers.length === 0) {
         return res.status(404).json({ message: "Not Found" });
       }
 
