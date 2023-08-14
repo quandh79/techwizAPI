@@ -653,8 +653,8 @@ exports.forgotPassword = async (req, res, next) => {
     }
 
     const data = await otp();
-    // ResetTokenStore.set(resetToken, email);
-    // console.log(resetToken);
+     ResetTokenStore.set(resetToken, email);
+     console.log(resetToken);
     const htmlContent = `
     <html>
     <body>
@@ -1016,7 +1016,7 @@ exports.resetPassword = async (req, res, next) => {
     const { newPassword, confirmPassword } = req.body;
     if (confirmPassword === newPassword) {
       const hashedPassword = await bcrypt.hash(newPassword, 10);
-      await UserProfile.findOneAndUpdate({
+      await User.findOneAndUpdate({
         email: stored.email,
         password: hashedPassword,
       });
