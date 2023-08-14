@@ -1,5 +1,5 @@
 const Favorites = require("../models/favorite");
-const product = require('../models/product');
+const product = require("../models/product");
 const users = require("../models/users");
 
 exports.getFavorites = async (req, res) => {
@@ -18,44 +18,43 @@ exports.getFavorites = async (req, res) => {
         res,
       });
     }
-    console.log(token)
+    console.log(token);
     const page = req.query.page * 1 || 1;
     const limit = req.query.limit * 1 || 5;
     const skip = (page - 1) * limit;
-const user = await users.findOne({token})
-console.log(user)
+    const user = await users.findOne({ token });
+    console.log(user);
     const totalFavorites = await Favorites.countDocuments({ userId: user._id });
     const totalPages = Math.ceil(totalFavorites / limit);
 
-    const favorites = await Favorites.find({ userId: user._id }).populate("productId")
-      // .skip(skip)
-      // .limit(limit);
+    const favorites = await Favorites.find({ userId: user._id }).populate(
+      "productId"
+    );
+    // .skip(skip)
+    // .limit(limit);
 
     if (!favorites) {
-      return res.status(404).json({ message: 'Favorites not found for this user.' });
+      return res
+        .status(404)
+        .json({ message: "Favorites not found for this user." });
     }
-console.log(favorites)
-    return res.status(200).json({
-      // totalPages,
-      favorites:favorites,
-    });
+    console.log(favorites);
+    return res.status(200).json(favorites);
   } catch (err) {
     res.status(500).json(err.message);
   }
 };
 
-
-
 exports.create = async (req, res) => {
   const user = req.user;
 
   const { data } = req.body;
-  console.log(data)
+  console.log(data);
   const f = Favorites.findOne({ userId: user.id })
     .then((favorites) => {
       if (!favorites) {
         const newFavorites = new Favorites({ userId: user.id });
-          newFavorites.productId.push(data);
+        newFavorites.productId.push(data);
         newFavorites.save();
         return res.status(200).json({ message: "Success" });
       } else {
