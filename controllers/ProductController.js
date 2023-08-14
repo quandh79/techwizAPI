@@ -30,13 +30,11 @@ exports.getProduct = async (req, res) => {
     const page = req.query.page * 1 || 1;
     const limit = req.query.limit * 1 || 10;
     const skip = (page - 1) * limit;
-    console.log(req.query);
 
     const totalProviders = await Product.countDocuments();
     const totalPages = Math.ceil(totalProviders / limit);
 
     const { providerId } = req.params;
-    console.log(providerId);
     if (providerId) {
       const data = await Product.find({
         providers: { $elemMatch: { id: providerId } },
@@ -48,7 +46,6 @@ exports.getProduct = async (req, res) => {
       }
       return res.status(200).json(data);
     }
-
     const data = await Product.find().skip(skip).limit(limit);
     return res.status(200).json(data);
   } catch (err) {
